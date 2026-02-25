@@ -34,6 +34,14 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Setup Environment Paths
+        run: |
+          echo "/opt/homebrew/bin" >> $GITHUB_PATH
+          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+          echo "ANDROID_HOME=$HOME/Library/Android/sdk" >> $GITHUB_ENV
 
       - name: dsfdsfdsfdsf
         run: patrol doctor
