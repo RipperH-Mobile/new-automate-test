@@ -1,0 +1,1 @@
+typedef EventListCallback = List<void Function()>;

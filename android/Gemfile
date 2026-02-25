@@ -1,0 +1,18 @@
+source "https://rubygems.org"
+
+gem 'fastlane', '>= 2.0'
+gem "dotenv"
+gem "fastlane-plugin-flutter_version", "~> 1.0", ">= 1.0.1"
+
+plugins_path = File.join(File.dirname(__FILE__), 'fastlane', 'Pluginfile')
+eval_gemfile(plugins_path) if File.exist?(plugins_path)
+
+gem "logger", "~> 1.6"
+
+gem "mutex_m", "~> 0.2.0"
+
+gem "abbrev", "~> 0.1.2"
+
+gem "ostruct", "~> 0.6.0"
+
+gem "bigdecimal", "~> 3.1"

@@ -1,0 +1,4 @@
+enum MediaDeviceType {
+  mic,
+  bluetoothDevice,
+}

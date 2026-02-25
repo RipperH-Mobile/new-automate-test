@@ -1,0 +1,115 @@
+sequenceDiagram
+    autonumber
+    
+    box rgb(230, 240, 255) UI Layer
+        participant User as User
+        participant Gallery as MediaGallery
+        participant Input as ChatRoomInput
+    end
+    
+    box rgb(255, 240, 230) Controller Layer
+        participant IRC as ChatRoomInputController
+        participant RC as ChatRoomController
+    end
+    
+    box rgb(230, 255, 240) Domain Layer
+        participant UC as SendFileMessageToServerUseCase
+        participant MQ as MessageQueueService
+    end
+    
+    box rgb(255, 230, 240) Service Layer
+        participant FS as FileService
+        participant MS as MessageService
+        participant API as Server API
+    end
+    
+    box rgb(240, 240, 240) Data Layer
+        participant DB as Isar DB
+        participant EB as EventBus
+    end
+    
+    User->>Input: Tap Gallery Button
+    Input->>IRC: openGalleryPicker()
+    IRC->>IRC: checkPermission()
+    IRC->>Gallery: Open MediaGallery
+    
+    User->>Gallery: Select Video(s)
+    User->>Gallery: Tap Done
+    Gallery-->>RC: onImageAndVideoPicked(MediaGalleryResult)
+    
+    Note over RC: Step 1: Validate & Separate Media
+    RC->>RC: Separate images/videos/unsupported
+    
+    loop For each Video
+        RC->>UC: SendFileMessageParams
+        
+        rect rgb(220, 255, 220)
+            Note over UC: Step 2: Create Message Collection
+            UC->>UC: createMessageCollectionV2()
+            UC->>DB: putMessage(isSending: true)
+            UC->>EB: fire(AddMessageToStateEvent)
+            EB-->>User: Show Message in UI (Sending...)
+        end
+        
+        rect rgb(255, 255, 220)
+            Note over UC,MQ: Step 3: Add to Queue (Background)
+            UC->>UC: processMessages()
+            UC->>UC: createSendMultiFileRequest()
+            UC->>MQ: addMessageToQueue()
+            MQ->>MQ: _processSendMessageQueue()
+        end
+        
+        rect rgb(220, 220, 255)
+            Note over MQ,UC: Step 4: Process Queue
+            MQ->>UC: onSendMessageProcessing()
+            UC->>UC: _sendFileToServerProcess()
+        end
+        
+        alt Video needs compression
+            rect rgb(255, 220, 220)
+                Note over UC,FS: Step 5: Compress Video
+                UC->>FS: compressVideo()
+                FS-->>UC: onCompressingProgress
+                UC->>EB: fire(VideoFileCompressingProgressEvent)
+                EB-->>User: Update Compression Progress
+            end
+        end
+        
+        opt isLocked = true
+            UC->>UC: _handleFileEncryption()
+        end
+        
+        rect rgb(220, 255, 255)
+            Note over UC,API: Step 6: Upload to Server
+            alt enableUploadPro
+                UC->>MS: uploadPro()
+                MS->>API: Get signed URLs
+                API-->>MS: Parts with URLs
+                loop For each chunk
+                    MS->>API: putUpload(chunk)
+                end
+                MS->>API: uploadProFinal()
+            else Normal Upload
+                UC->>MS: uploadVideoFile()
+                MS->>MS: uploadThumbnailVideo()
+                MS->>API: POST /upload (multipart)
+            end
+            API-->>MS: MessageCollection
+        end
+        
+        rect rgb(255, 240, 220)
+            Note over UC,API: Step 7: Confirm Upload
+            UC->>MS: uploadFilesConfirm()
+            MS->>API: POST /uploadConfirm
+            API-->>MS: Final MessageCollection
+        end
+        
+        rect rgb(220, 255, 220)
+            Note over UC,EB: Step 8: Update Local & UI
+            UC->>DB: syncHandleUpdateMessage()
+            UC->>EB: fire(MessageUpdateEvent)
+            EB-->>User: Update UI (Sent Successfully)
+        end
+    end
+    
+    Note over User,API: Video Send Complete

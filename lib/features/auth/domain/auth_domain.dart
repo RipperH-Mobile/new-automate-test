@@ -1,0 +1,43 @@
+//------------------------------------Entities for the Authentication feature------------------------------------------------------------------------
+export 'package:uchat/features/auth/domain/entities/auth_login_entity.dart';
+export 'package:uchat/features/auth/domain/entities/check_user_entity.dart';
+export 'package:uchat/features/auth/domain/entities/check_user_forgot_password_entity.dart';
+export 'package:uchat/features/auth/domain/entities/get_term_and_condition_from_server_params.dart';
+export 'package:uchat/features/auth/domain/entities/link_account_auth_entity.dart';
+export 'package:uchat/features/auth/domain/entities/otp_entity.dart';
+export 'package:uchat/features/auth/domain/entities/password_condition_entity.dart';
+export 'package:uchat/features/auth/domain/entities/verify_otp_entity.dart';
+export 'package:uchat/features/auth/domain/entities/verify_otp_login_entity.dart';
+//------------------------------------Interfaces for the Authentication feature------------------------------------------------------------------------
+export 'package:uchat/features/auth/domain/repositories/auth_server_repository.dart';
+export 'package:uchat/features/auth/domain/repositories/social_auth_provider_repository.dart';
+export 'package:uchat/features/auth/domain/repositories/social_auth_server_repository.dart';
+//------------------------------------Use cases for the Authentication feature------------------------------------------------------------------------
+export 'package:uchat/features/auth/domain/use_cases/check_user_exist_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/clear_otp_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/forgot_password_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/get_forgot_password_display_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/get_otp_forgot_password_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/get_otp_saved_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/link_account_with_apple_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/link_account_with_email_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/link_account_with_facebook_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/link_account_with_google_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/login_password_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/login_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/official_account_qr_sign_in_verify_token_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/register_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/reset_social_auth_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/save_otp_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/set_password_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_apple_provider_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_apple_server_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_facebook_provider_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_facebook_server_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_google_provider_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_in_with_google_server_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/sign_out_with_google_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/verify_otp_link_email_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/verify_otp_login_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/verify_otp_use_case.dart';
+export 'package:uchat/features/auth/domain/use_cases/verify_uchat_id_use_case.dart';

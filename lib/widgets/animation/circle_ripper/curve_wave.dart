@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+import 'dart:math' as math show sin, pi;
+import 'package:flutter/animation.dart';
+
+class CurveWave extends Curve {
+  const CurveWave();
+  @override
+  double transform(double t) {
+    if (t == 0) {
+      return 0;
+    }
+    if (t == 1) {
+      return 1;
+    }
+    return math.sin(t * math.pi).abs();
+  }
+}

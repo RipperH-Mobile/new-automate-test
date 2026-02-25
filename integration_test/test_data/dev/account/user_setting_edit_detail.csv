@@ -1,0 +1,10 @@
+test_case,test_description,is_run_test_case,is_delete_after_run,is_register,is_login_by_phone,register_phone_number,register_profile_name,register_password,register_confirm_password,register_uchat_id,is_login_by_friend,login_by_me_phone_number,login_by_me_password,login_by_friend_phone_number,login_by_friend_password,is_select_edit_profile,is_check_profile_name,profile_name,is_check_uchat_id,uchat_id,is_check_status,status,is_check_date_of_birth,date_of_birth,expected_navigate_page,expected_result,expected_message,actual_result,actual_version
+1,Verify change user's profile name,yes,yes,yes,yes,+66601500000,atmchangeprofile,Qa@12345,Qa@12345,test0001,,+66601500000,Qa@12345,,,yes,yes,changed000,,,,,,,User Profile,success,,,
+2,Profile name is blank,no,yes,yes,yes,+66601500001,atmblankprofile,Qa@12345,Qa@12345,test0002,,+66601500001,Qa@12345,,,yes,yes,,,,,,,,Edit Profile,fail,,,
+3,Change uchat id,yes,yes,yes,yes,+66601500002,atmchangeid,Qa@12345,Qa@12345,test0003,,+66601500002,Qa@12345,,,yes,,,yes,changuchat003,,,,,User Profile,success,,,
+4,UChat ID is blank,no,yes,yes,yes,+66601500003,atmblankid,Qa@12345,Qa@12345,test0004,,+66601500003,Qa@12345,,,yes,,,yes,,,,,,Edit Profile,fail,,,
+5,Verify add date of birth,yes,yes,yes,yes,+66601500004,atmadddob,Qa@12345,Qa@12345,test0005,,+66601500004,Qa@12345,,,yes,,,,,,,yes,13 Feb 1999,User Profile,success,,,
+6,Date of birth is under 13 years old,no,yes,yes,yes,+66601500005,atmunder13,Qa@12345,Qa@12345,test0006,,+66601500005,Qa@12345,,,yes,,,,,,,yes,13 Feb 2013,Edit Profile,fail,,,
+7,Date of birth over 100 years old,no,yes,yes,yes,+66601500006,atmover100,Qa@12345,Qa@12345,test0007,,+66601500006,Qa@12345,,,yes,,,,,,,yes,14 Feb 2126,Edit Profile,fail,,,
+8,Change profile status,yes,yes,yes,yes,+66601500007,atmchangestatus,Qa@12345,Qa@12345,test0008,,+66601500007,Qa@12345,,,yes,,,,,yes,test,,,User Profile,success,,,
+9,Delete profile status,no,yes,yes,yes,+66601500008,atmdeletestatus,Qa@12345,Qa@12345,test0009,,+66601500008,Qa@12345,,,yes,,,,,yes,,,,User Profile,success,,,

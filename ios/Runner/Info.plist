@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AppGroupIdentifier</key>
+	<string>${APP_GROUP_IDENTIFIER}</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>$(APP_DISPLAY_NAME)</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ShareHandler</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.file-url</string>
+				<string>public.image</string>
+				<string>public.text</string>
+				<string>public.movie</string>
+				<string>public.url</string>
+				<string>public.data</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>th</string>
+		<string>en</string>
+	</array>
+	<key>CFBundleName</key>
+	<string>uchat</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+				<string>$(FIREBASE_REVERSED_CLIENT_ID)</string>
+				<string>fb${FACEBOOK_APP_ID}</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FDMaximumConcurrentTasks</key>
+	<integer>5</integer>
+	<key>FacebookAppID</key>
+	<string>${FACEBOOK_APP_ID}</string>
+	<key>FacebookClientToken</key>
+	<string>${FACEBOOK_CLIENT_TOKEN}</string>
+	<key>FacebookDisplayName</key>
+	<string>User Authentication App</string>
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
+	<key>GIDClientID</key>
+	<string>$(FIREBASE_CLIENT_ID)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
+		<string>googlegmail</string>
+		<string>ms-outlook</string>
+		<string>readdle-spark</string>
+		<string>airmail</string>
+		<string>x-web-search</string>
+		<string>googlechromes</string>
+		<string>firefox</string>
+		<string>opera-https</string>
+		<string>edge-https</string>
+		<string>whatsapp</string>
+		<string>telegram</string>
+		<string>viber</string>
+		<string>line</string>
+		<string>skype</string>
+		<string>instagram</string>
+		<string>twitter</string>
+		<string>tweetbot</string>
+		<string>comgooglemaps</string>
+		<string>maps</string>
+		<string>waze</string>
+		<string>youtube</string>
+		<string>tel</string>
+		<string>sms</string>
+		<string>mailto</string>
+		<string>http</string>
+		<string>https</string>
+		<string>ftp</string>
+		<string>itms</string>
+		<string>itms-apps</string>
+		<string>itms-appss</string>
+		<string>itmss</string>
+		<string>facetime</string>
+		<string>facetime-audio</string>
+	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<string>No</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>UChat needs VOIP ringtone permission so that you can use calling ringtone.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>UChat needs bluetooth access for manage input/output audio device for calling</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Application need permission to access calendar data.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>UChat needs camera access so that you can take photos, or video call.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Application need permission to access contact data.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID is used to authenticate user before accessing the application if feature is enabled.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>UChat needs permission to access location data when sharing your location with your friend.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>UChat needs permission to access location data when sharing your location with your friend.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>UChat needs permission to access location data when sharing your location with your friend.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>UChat needs access to your microphone so that you can make calls.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Application need to access motion data.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>UChat needs photo library access so that you can send photos or select image for your profile.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Permission is needed for speech-to-text.</string>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>INPersonHandle</string>
+		<string>INPerson</string>
+		<string>INImage</string>
+		<string>INSendMessageIntent</string>
+	</array>
+	<key>OneSignal_app_groups_key</key>
+	<string>${APP_GROUP_IDENTIFIER}</string>
+	<key>OneSignal_disable_badge_clearing</key>
+	<true/>
+	<key>PHPhotoLibraryPreventAutomaticLimitedAccessAlert</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+		<string>voip</string>
+	</array>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
+	<key>io.flutter.embedded_views_preview</key>
+	<string>YES</string>
+	<key>NSUserTrackingUsageDescription</key>
+  <string>UChat requests permission to collect diagnostic and usage data. This enables us to enhance system performance and ensure a more reliable application experience.</string>
+</dict>
+</plist>

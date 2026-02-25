@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.18.3</string>
+	<key>CFBundleVersion</key>
+	<string>471</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>$(PRODUCT_COPYRIGHT)</string>
+	<key>NSMainNibFile</key>
+	<string>MainMenu</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.social-networking</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+    <key>NSAppleMusicUsageDescription</key>
+    <string>UChat needs VOIP ringtone permission so that you can use calling ringtone.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>Application need permission to access calendar data.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>UChat needs camera access so that you can take photos, or video call.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>Application need permission to access contact data.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>Face ID is used to authenticate user before accessing the application if feature is enabled.</string>
+    <key>NSHumanReadableCopyright</key>
+    <string>$(PRODUCT_COPYRIGHT)</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>UChat needs permission to access location data when sharing your location with your friend.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>UChat needs permission to access location data when sharing your location with your friend.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>UChat needs permission to access location data when sharing your location with your friend.</string>
+    <key>NSMainNibFile</key>
+    <string>MainMenu</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>UChat needs access to your microphone so that you can make calls.</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Application need to access motion data.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>UChat needs photo library access so that you can send photos or select image for your profile.</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Permission is needed for speech-to-text.</string>
+    <key>NSUserNotificationAlertStyle</key>
+    <string>banner</string>
+
+    <!-- Google Sign-in Section -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>ShareMedia-$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+                <string>com.googleusercontent.apps.575432061589-6v20tq3dfbpmpckrcmhflas1m68g0i6q</string>
+            </array>
+        </dict>
+    </array>
+    <key>GIDClientID</key>
+    <string>575432061589-6v20tq3dfbpmpckrcmhflas1m68g0i6q.apps.googleusercontent.com</string>
+
+</dict>
+</plist>

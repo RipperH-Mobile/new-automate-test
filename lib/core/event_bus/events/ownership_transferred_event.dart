@@ -1,0 +1,3 @@
+class OwnershipTransferredEvent {
+  OwnershipTransferredEvent();
+}

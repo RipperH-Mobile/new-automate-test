@@ -1,0 +1,15 @@
+{
+  "originHash" : "fe10aafbaf409842f476e8822e8d586ae13fa97ca251345350315549123c6d78",
+  "pins" : [
+    {
+      "identity" : "onesignal-xcframework",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/OneSignal/OneSignal-XCFramework",
+      "state" : {
+        "revision" : "5016b3aee6e08e9a8e55b2197e60a40ee3d3ebe5",
+        "version" : "3.11.2"
+      }
+    }
+  ],
+  "version" : 3
+}

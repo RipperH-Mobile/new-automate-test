@@ -1,0 +1,10 @@
+pubspec.lock
+pubspec.yaml
+android/settings.gradle.kts
+android/app/build.gradle.kts
+ios/Podfile
+ios/Podfile.lock
+ios/Runner.xcodeproj/xcshareddata/xcschemes/dev.xcscheme
+ios/Runner.xcodeproj/xcshareddata/xcschemes/sit.xcscheme
+ios/Runner.xcodeproj/xcshareddata/xcschemes/uat.xcscheme
+ios/Runner.xcodeproj/project.pbxproj

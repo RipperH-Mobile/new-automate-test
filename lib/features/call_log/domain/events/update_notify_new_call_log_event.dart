@@ -1,0 +1,3 @@
+class UpdateNotifyNewCallLogEvent {
+  UpdateNotifyNewCallLogEvent();
+}

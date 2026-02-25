@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Dev",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "dev"]
+    },
+    {
+      "name": "Run Sit",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "sit"]
+    },
+    {
+      "name": "Run Uat",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "uat"]
+    },
+    {
+      "name": "Run Prd",
+      "request": "launch",
+      "type": "dart",
+      "args": ["--flavor", "prd"]
+    },
+    {
+      "name": "Run Dev (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile",
+      "args": ["--flavor", "dev"]
+    },
+    {
+      "name": "Run Dev (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release",
+      "args": ["--flavor", "dev"]
+    }
+  ]
+}

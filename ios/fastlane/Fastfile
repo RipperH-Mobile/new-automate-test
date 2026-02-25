@@ -1,0 +1,323 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:ios)
+
+platform :ios do
+  api_key = app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_KEY_ID"], # Key ID stored in GitHub Secrets
+    issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"], # Issuer ID stored in GitHub Secrets
+    key_content: ENV["APP_STORE_CONNECT_KEY_CONTENT"], # API key content stored in GitHub Secrets
+    in_house: false # Set to true if this is an enterprise account
+  )
+
+  app_identifier = "social.uchat"
+  app_group_id =  "group.social.uchat"
+
+  dev_app_identifier = "social.uchat.messenger.dev"
+  dev_app_group_id =  "group.social.uchat.messenger.dev"
+
+  uat_app_identifier = "social.uchat.messenger.uat"
+  uat_app_group_id =  "group.social.uchat.messenger.uat"
+
+  sit_app_identifier = "social.uchat.messenger.sit"
+  sit_app_group_id =  "group.social.uchat.messenger.sit"
+
+  desc "Increment the build number"
+  lane :process_build_number do
+    build_number = ENV['BUILD_NUMBER'].to_i
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj",
+      build_number: build_number
+    )
+  end
+
+  desc "Increment the version number"
+  lane :process_version_number do
+    version = ENV["BUILD_VERSION"] || flutter_version()["version_name"]
+
+    increment_version_number(
+      xcodeproj: "Runner.xcodeproj",
+      version_number: version # Set a specific version number
+    )
+  end
+
+  desc "Build ios adhoc app"
+  lane :build_adhoc do
+    setup_ci if ENV['CI']
+
+    process_version_number
+    process_build_number
+    match(type: "adhoc", readonly: is_ci)
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      profile_name: "match AdHoc #{bundle_id}",
+      targets: ["Runner"]
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      profile_name: "match AdHoc #{bundle_id}.ShareExtension",
+      targets: ["ShareExtension"]
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      profile_name: "match AdHoc #{bundle_id}.OneSignalNotificationServiceExtension",
+      targets: ["OneSignalNotificationServiceExtension"]
+    )
+
+    Dir.chdir("../..") do
+      sh("fvm flutter build ipa --debug --export-options-plist=./ios/fastlane/export_options_adhoc.plist")
+    end
+  end
+
+  desc "Build ios app"
+  lane :build do |options|
+    # Clean old build
+    sh("rm -rf ../build/ios/ipa/uchat.ipa")
+
+    app_identifier = options[:app_identifier] || "social.uchat"
+    flavor = options[:flavor] || ""
+    export_options_file = options[:export_options_file] || "export_options.plist"
+    app_identifier_list = [app_identifier, "#{app_identifier}.ShareExtension", "#{app_identifier}.OneSignalNotificationServiceExtension"]
+
+    if flavor == ""
+      build_configurations = ["Release"]
+    else
+      build_configurations = ["Release-#{flavor}"]
+    end
+
+    setup_ci if ENV['CI']
+
+    process_version_number
+    process_build_number
+
+    match(
+      type: "appstore",
+      app_identifier: app_identifier_list,
+      readonly: is_ci
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      bundle_identifier: app_identifier,
+      profile_name: "match AppStore #{app_identifier}",
+      build_configurations: build_configurations,
+      targets: ["Runner"]
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      bundle_identifier: "#{app_identifier}.ShareExtension",
+      profile_name: "match AppStore #{app_identifier}.ShareExtension",
+      build_configurations: build_configurations,
+      targets: ["ShareExtension"]
+    )
+
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "./Runner.xcodeproj",
+      team_id: ENV["TEAM_ID"],
+      bundle_identifier: "#{app_identifier}.OneSignalNotificationServiceExtension",
+      profile_name: "match AppStore #{app_identifier}.OneSignalNotificationServiceExtension",
+      build_configurations: build_configurations,
+      targets: ["OneSignalNotificationServiceExtension"]
+    )
+
+    Dir.chdir("../..") do
+      if flavor == ""
+        sh("fvm flutter build ipa --release --export-options-plist=./ios/fastlane/#{export_options_file}")
+      else
+        sh("fvm flutter build ipa --release --flavor=#{flavor} --export-options-plist=./ios/fastlane/#{export_options_file}")
+      end
+    end
+  end
+
+  lane :deploy_testflight do
+    upload_to_testflight(
+      ipa: '../build/ios/ipa/uchat.ipa',
+      api_key_path: 'fastlane/appstore_connect_api_key.json',
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "Build prd"
+  lane :build_prd do
+    build(
+      flavor: "prd",
+      app_name: 'UChat',
+      app_identifier: app_identifier,
+      app_group_id: app_group_id,
+      export_options_file: "export_options.plist",
+      app_icon_name: 'AppIcon-prd',
+      domains: ["uchat.social"]
+    )
+  end
+
+  desc "Push a new release build to TestFlight"
+  lane :prd do
+    build_prd
+    deploy_testflight
+    upload_dsym(
+      build_type: "prd"
+    )
+  end
+
+  desc "Build dev"
+  lane :build_dev do
+    build(
+      flavor: "dev",
+      app_name: 'UChat Dev',
+      app_identifier: dev_app_identifier,
+      app_group_id: dev_app_group_id,
+      export_options_file: "export_options_dev.plist",
+      app_icon_name: 'AppIcon-dev',
+      domains: ["dev.uchat.social"]
+    )
+  end
+
+  desc "Push a new dev build to TestFlight"
+  lane :dev do
+    build_dev
+    deploy_testflight
+    upload_dsym(
+      build_type: "dev"
+    )
+  end
+
+  desc "Build uat"
+  lane :build_uat do
+    build(
+      flavor: "uat",
+      app_name: 'UChat Uat',
+      app_identifier: uat_app_identifier,
+      app_group_id: uat_app_group_id,
+      export_options_file: "export_options_uat.plist",
+      app_icon_name: 'AppIcon-uat',
+      domains: ["uat.uchat.social"]
+    )
+  end
+
+  desc "Push a new uat build to TestFlight"
+  lane :uat do
+    build_uat
+    deploy_testflight
+    upload_dsym(
+      build_type: "uat"
+    )
+  end
+
+  desc "Build sit"
+  lane :build_sit do
+    build(
+      flavor: "sit",
+      app_name: 'UChat Sit',
+      app_identifier: sit_app_identifier,
+      app_group_id: sit_app_group_id,
+      export_options_file: "export_options_sit.plist",
+      app_icon_name: 'AppIcon-sit',
+      domains: ["sit.uchat.social"]
+    )
+  end
+
+  desc "Push a new sit build to TestFlight"
+  lane :sit do
+    build_sit
+    deploy_testflight
+    upload_dsym(
+      build_type: "sit"
+    )
+  end
+
+  lane :register_ios_devices do
+    register_devices(
+      devices_file: "./fastlane/devices.txt"
+    )
+
+    match(type: "adhoc", force_for_new_devices: true)
+    match(type: "adhoc", force_for_new_devices: true, app_identifier: dev_app_identifier,)
+    match(type: "adhoc", force_for_new_devices: true, app_identifier: uat_app_identifier,)
+    match(type: "adhoc", force_for_new_devices: true, app_identifier: sit_app_identifier,)
+  end
+
+  desc "Upload dSYM to Firebase Crashlytics"
+  lane :upload_dsym do |options|
+    build_type = options[:build_type] || "prd"
+
+    current_dir = File.expand_path("..", __FILE__)
+    UI.message("Current directory: #{current_dir}")
+    
+    # Read GOOGLE_APP_ID from GoogleService-Info.plist based on build type
+    gsp_path = "../Firebase/#{build_type}/GoogleService-Info.plist"
+    gsp_expanded_path = File.expand_path(gsp_path, current_dir)
+    UI.message("Using GoogleService-Info.plist at: #{gsp_expanded_path}")
+    
+    # Check if GoogleService-Info.plist exists
+    unless File.exist?(gsp_expanded_path)
+      UI.user_error!("GoogleService-Info.plist not found at: #{gsp_expanded_path}")
+    end
+    
+    # Read GOOGLE_APP_ID from plist
+    app_id = get_info_plist_value(
+      path: gsp_expanded_path,
+      key: "GOOGLE_APP_ID"
+    )
+    
+    if app_id.nil? || app_id.empty?
+      UI.user_error!("GOOGLE_APP_ID not found in #{gsp_path}")
+    end
+    
+    UI.message("Using Firebase app ID: #{app_id} for #{build_type}")
+    
+    # Path to dSYM
+    dsym_path = "../../build/ios/archive/Runner.xcarchive/dSYMs/Runner.app.dSYM"
+    dsym_expanded_path = File.expand_path(dsym_path, current_dir)
+    UI.message("Using dSYM at: #{dsym_expanded_path}")
+
+    binary_path = "../Pods/FirebaseCrashlytics/upload-symbols"
+    binary_expanded_path = File.expand_path(binary_path, current_dir)
+    UI.message("Using upload-symbols binary at: #{binary_expanded_path}")
+    
+    # Check if dSYM exists
+    if File.exist?(dsym_expanded_path)
+      UI.message("Found dSYM at: #{dsym_expanded_path}")
+      
+      # Upload to Crashlytics using fastlane action
+      upload_symbols_to_crashlytics(
+        dsym_path: dsym_expanded_path,
+        gsp_path: gsp_expanded_path,
+        binary_path: binary_expanded_path
+      )
+      
+      UI.success("Successfully uploaded dSYM for #{build_type}")
+    else
+      UI.important("dSYM not found at: #{dsym_expanded_path}")
+      UI.important("This is expected for Flutter builds without native code changes")
+    end
+  end
+
+end

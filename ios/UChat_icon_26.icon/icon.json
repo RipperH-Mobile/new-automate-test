@@ -1,0 +1,157 @@
+{
+  "fill-specializations" : [
+    {
+      "value" : {
+        "linear-gradient" : [
+          "display-p3:0.10251,0.46010,1.00000,1.00000",
+          "display-p3:0.00000,0.24341,1.00000,1.00000"
+        ]
+      }
+    },
+    {
+      "appearance" : "dark",
+      "value" : {
+        "automatic-gradient" : "display-p3:0.00000,0.00000,0.00000,1.00000"
+      }
+    }
+  ],
+  "groups" : [
+    {
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.09852,0.41393,0.96611,1.00000"
+              }
+            }
+          ],
+          "hidden" : false,
+          "image-name" : "Artboard 2 copy 3.svg",
+          "name" : "Artboard 2 copy 3",
+          "opacity-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : 1
+            }
+          ]
+        }
+      ],
+      "lighting" : "individual",
+      "opacity" : 0.6,
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          -0.3817501634113354,
+          41.74306503466194
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 1
+      }
+    },
+    {
+      "blend-mode" : "normal",
+      "blur-material" : 0.5,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.09852,0.41393,0.96611,1.00000"
+              }
+            }
+          ],
+          "image-name" : "Artboard 2 copy 4.svg",
+          "name" : "Artboard 2 copy 4"
+        }
+      ],
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          -0.3817501634113354,
+          41.74306503466194
+        ]
+      },
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : 0.5,
+      "hidden" : false,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "fill-specializations" : [
+            {
+              "value" : "none"
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.09852,0.41393,0.96611,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
+          "image-name" : "Artboard 2 copy 2.svg",
+          "name" : "Artboard 2 copy 2",
+          "opacity" : 1
+        }
+      ],
+      "lighting" : "combined",
+      "opacity" : 0.8,
+      "position" : {
+        "scale" : 1,
+        "translation-in-points" : [
+          -0.3817501634113354,
+          41.74306503466194
+        ]
+      },
+      "shadow-specializations" : [
+        {
+          "value" : {
+            "kind" : "layer-color",
+            "opacity" : 0.5
+          }
+        },
+        {
+          "appearance" : "dark",
+          "value" : {
+            "kind" : "neutral",
+            "opacity" : 0
+          }
+        }
+      ],
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.38
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

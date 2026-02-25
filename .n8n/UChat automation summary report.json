@@ -1,0 +1,174 @@
+{
+  "name": "UChat automation summary report",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -112
+      ],
+      "id": "8352cec4-d94f-40c2-8c0c-5127a8aff67b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/test_results/*.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c4006f5d-8de4-499a-8c7f-d2ab182534ad",
+      "name": "Read/Write Files from Disk",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "e01c37d4-7d40-4254-a774-c51aec8bf25a",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "let totalTests = 0;\nlet passedTests = 0;\nlet failedTests = 0;\nlet failedDetails = [];\nlet appVersion = \"Unknown\";\n\n// ดึงข้อมูลทุกแถวที่ Spreadsheet ส่งมา\nconst items = $input.all();\n\nfor (const item of items) {\n  const data = item.json;\n  totalTests++;\n  \n  // เก็บข้อมูล Version จากแถวแรกไว้ทำ Report\n  if (totalTests === 1 && data.actual_version) {\n      appVersion = data.actual_version;\n  }\n\n  // เช็กผลลัพธ์ (ทำให้เป็นตัวพิมพ์ใหญ่และตัดช่องว่างทิ้ง เพื่อความชัวร์)\n  const result = (data.actual_result || \"\").trim().toUpperCase();\n\n  if (result === 'PASSED') {\n    passedTests++;\n  } else {\n    failedTests++;\n    // ถ้าไม่ผ่าน ให้เก็บเลขเคสและชื่อเคสไว้\n    failedDetails.push(`- Case ${data.test_case}: ${data.test_description} (Result: ${data.actual_result})`);\n  }\n}\n\n// กำหนดสถานะรวม\nconst status = failedTests === 0 ? \"✅ PASS\" : \"❌ FAIL\";\n\n// ส่งข้อมูลสรุปผลออกไปให้ Node ถัดไป\nreturn [{\n  json: {\n    report: {\n      status: status,\n      total: totalTests,\n      passed: passedTests,\n      failed: failedTests,\n      failed_cases_list: failedDetails.length > 0 ? failedDetails.join('\\n') : \"None\",\n      version_info: appVersion\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "88bcc2ce-b9cf-4c4c-b07e-5bcb217c1aa1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0A3W3PKJVC",
+          "mode": "id"
+        },
+        "text": "=*📊 Patrol Integration Test Report*\n*Status:* {{ $json.report.status }}\n*Environment:* {{ $json.report.version_info }}\n\n*Summary:*\n• Total Tests: {{ $json.report.total }}\n• ✅ Passed: {{ $json.report.passed }}\n• ❌ Failed: {{ $json.report.failed }}\n\n*Failed Cases Details:*\n{{ $json.report.failed_cases_list }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        832,
+        0
+      ],
+      "id": "cd0c4263-e852-47ac-b6d5-d369b61e54a7",
+      "name": "Send a message",
+      "webhookId": "a6e51a02-d3ea-405a-818b-d161ee1dd5a1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "slackApi": {
+          "id": "aBjuvyEpNLuSkfkT",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "patrol-done",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        96
+      ],
+      "id": "c034713b-0b80-46d5-a2ce-50a57751e367",
+      "name": "Webhook",
+      "webhookId": "fd74b72e-8bc2-4f68-a932-a02365363620"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f8776454-01f5-4b45-9ad2-65e6fb0f472a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f13cf30b98bf3682fb9780a3ba6d200cab9b066cc31b17a01966d1533e5f4e57"
+  },
+  "id": "lm9S3DaMoEtYkLZ4",
+  "tags": []
+}

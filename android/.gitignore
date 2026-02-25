@@ -1,0 +1,54 @@
+gradle-wrapper.jar
+/.gradle
+/captures/
+/gradlew
+/gradlew.bat
+/local.properties
+/app/.cxx/
+/.idea/
+GeneratedPluginRegistrant.java
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/docs/deployment/android#reference-the-keystore-from-the-app
+key.properties
+key.jks
+
+fastlane/keystore
+fastlane/source/*
+fastlane/report.xml
+
+# User-specific stuff:
+.idea/other.xml
+.idea/misc.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+.idea/material_theme_project_new.xml
+
+# Sensitive or high-churn files:
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+.idea/shelf/*
+.idea/shelf*
+
+# Gradle:
+.idea/gradle.xml
+.idea/libraries
+
+.idea/deploymentTargetSelector.xml
+.idea/migrations.xml
+
+# Mongo Explorer plugin:
+.idea/mongoSettings.xml
+
+google-services.json
+
+.env.default
+
+.kotlin/sessions/*

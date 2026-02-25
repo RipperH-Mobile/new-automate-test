@@ -1,0 +1,4 @@
+enum MessageItemType {
+  message,
+  title,
+}

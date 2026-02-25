@@ -1,0 +1,18 @@
+import 'package:uchat/features/chat_room/data/models/collections/room_collection.dart';
+
+class SearchMessagesResultModel {
+  RoomCollection room;
+  int foundMessageCount;
+
+  SearchMessagesResultModel({
+    required this.room,
+    required this.foundMessageCount,
+  });
+}
+
+class SearchMessagesResultModelWithCount {
+  final List<SearchMessagesResultModel> result;
+  final int count;
+
+  SearchMessagesResultModelWithCount(this.result, this.count);
+}

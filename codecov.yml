@@ -1,0 +1,28 @@
+# .codecov.yml
+
+# Configuration for coverage status checks reported to GitHub
+coverage:
+  status:
+    # Settings for the overall project coverage
+    project:
+      default:
+        # Optional: You can set an overall project target if you want
+        # target: 75%
+        # Don't make the *project* coverage check blocking by default
+        # We primarily care about the patch coverage for this requirement
+        informational: true
+
+    # Settings for the coverage of NEW and CHANGED lines in the Pull Request
+    patch:
+      default:
+        # REQUIRED: Set the minimum coverage percentage for new/changed code
+        target: 50%
+        # Make this status check REQUIRED/BLOCKING.
+        # If patch coverage is below 50%, the Codecov check on the PR will fail.
+        informational: true
+
+# Optional: Configure how the Codecov report appears as a comment on the PR
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default # Posts a new comment or updates the existing one on PR updates
+  require_changes: false # Post a comment even if coverage doesn't change

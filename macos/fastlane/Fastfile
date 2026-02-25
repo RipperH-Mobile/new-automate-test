@@ -1,0 +1,113 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:mac)
+
+dmg_file_name = "UChat_installer.dmg"
+
+platform :mac do
+  # run with command `bundle exec fastlane delete_dmg`
+  desc "Delete the DMG file from the installer directory"
+  lane :delete_dmg do |options|
+    fileName = options[:fileName]
+
+    Dir.chdir "../../desktop_installers" do
+      if File.file?("./installer/#{dmg_file_name}")
+        sh("rm", "./installer/#{dmg_file_name}")
+        puts "Deleted #{dmg_file_name} 🗑️"
+      else
+        puts "#{dmg_file_name} does not exist 🤷"
+      end
+    end
+
+
+  end
+
+  # run with command `bundle exec fastlane build`
+  desc "Build the macOS app"
+  lane :build do |options|
+    Dir.chdir "../../" do
+      sh("pwd")
+      sh("fvm", "flutter", "build", "macos", "--release")
+    end
+
+    puts "Done! building the macOS app 🚀"
+  end
+
+  # run with command `bundle exec fastlane dmg_pack`
+  desc "Pack the macOS app to a DMG file"
+  lane :pack_dmg do |options|
+    configFilePath = options[:configFilePath]
+    targetOutputPath = options[:targetOutputPath]
+
+    if configFilePath.nil?
+      configFilePath = "./dmg_creator/config.json"
+    end
+
+    if targetOutputPath.nil?
+      targetOutputPath = "./installer/#{dmg_file_name}"
+    end
+
+    delete_dmg()
+    Dir.chdir "../../desktop_installers" do
+      sh("appdmg", configFilePath, targetOutputPath)
+    end
+
+    puts "Done! building the macOS app 🚀"
+  end
+
+  desc "Build app and pack to DMG"
+  lane :build_dmg do |options|
+    build()
+    pack_dmg()
+
+    puts "Done! building the macOS app and packing to DMG 🚀"
+  end
+
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    build_number = number_of_commits()
+    build_name = flutter_version()["version_name"]
+
+    # https://docs.fastlane.tools/actions/increment_version_number/
+    increment_version_number(
+      xcodeproj: "Runner.xcodeproj",
+      version_number: flutter_version()["version_name"] # Set a specific version number
+    )
+
+    # https://docs.fastlane.tools/actions/increment_build_number/
+    increment_build_number(
+      xcodeproj: "Runner.xcodeproj",
+      build_number: build_number
+    )
+
+    match(type: "appstore", additional_cert_types: "mac_installer_distribution")
+    build_mac_app(
+      build_path: "../build/macos",
+      output_directory: "../build/macos/output",
+    )
+#     Dir.chdir "../.." do
+#       sh("fvm", "flutter", "build", "macos", "--release")
+#     end
+
+#     add_git_tag(
+#       tag: 'fastlane-builds/macos/v'+build_name.to_s+'.'+build_number.to_s
+#     )
+
+    upload_to_testflight(
+      pkg: '../build/macos/output/UChat Messenger.pkg',
+    )
+  end
+end

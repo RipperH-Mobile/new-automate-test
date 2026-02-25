@@ -1,0 +1,20 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n_patrol_automation
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Bangkok
+      - TZ=Asia/Bangkok
+      - N8N_RESTRICT_FILE_ACCESS_TO=/data/test_results;/home/node/.n8n-files
+    volumes:
+      # 1. เก็บข้อมูลการตั้งค่าและ Workflow ของ n8n ไม่ให้หาย
+      - n8n_data:/home/node/.n8n
+      # 2. เชื่อมโฟลเดอร์ผลลัพธ์จาก Patrol
+      - ../integration_test/test_results:/data/test_results
+
+volumes:
+  n8n_data:
+    name: n8n_data
