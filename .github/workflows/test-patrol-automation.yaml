@@ -35,6 +35,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install yq
+        run: |
+          if ! command -v yq &> /dev/null; then
+            sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_darwin_arm64 -O /usr/local/bin/yq
+            sudo chmod +x /usr/local/bin/yq
+          fi
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.21.0
         with:
