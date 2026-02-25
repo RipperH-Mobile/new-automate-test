@@ -1,62 +1,126 @@
-name: Run patrol automate test
+name: Ubuntu Simulation on Mac
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # กดรันเองเพื่อเทส
+
+jobs:
+  simulate-ubuntu:
+    runs-on: self-hosted # รันบนเครื่อง Mac ของคุณ
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Reset & Boot Ubuntu VM (Lima)
+        run: |
+          # 1. ลบเครื่องเก่าทิ้งเพื่อให้มั่นใจว่า "สะอาด 100%"
+          limactl stop -f ubuntu-tester || true
+          limactl delete ubuntu-tester || true
+          
+          # 2. สร้างและเริ่ม Ubuntu VM ใหม่ (ใช้ template มาตรฐาน)
+          # --tty=false เพื่อให้รันแบบ non-interactive ใน CI
+          limactl start --name=ubuntu-tester --tty=false template://ubuntu
+          
+      - name: Install Tools & Run Patrol in Ubuntu
+        run: |
+          # สั่งงานเข้าไปใน Ubuntu VM ผ่าน limactl shell
+          limactl shell ubuntu-tester bash << 'EOF'
+            set -e # พังแล้วหยุดทันที
+            
+            echo "🐧 Inside Ubuntu VM: Starting Clean Installation..."
+            
+            # 1. Update System
+            sudo apt-get update && sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa
+            
+            # 2. Install Java 17 (เหมือนที่ GitHub Actions มีให้)
+            sudo apt-get install -y openjdk-17-jdk
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            
+            # 3. Install Flutter (เริ่มจากศูนย์)
+            git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
+            export PATH="$PATH:$HOME/flutter/bin"
+            
+            # 4. Install Patrol CLI
+            flutter pub global activate patrol_cli
+            export PATH="$PATH:$HOME/.pub-cache/bin"
+            
+            # 5. ย้ายเข้าไปในโฟลเดอร์โปรเจค
+            # Lima จะแชร์ไฟล์จาก Mac มาที่ Path เดียวกันโดยอัตโนมัติ
+            cd ${{ github.workspace }}
+            
+            # 6. ตรวจสอบความพร้อม
+            echo "🚀 Final Check with Patrol Doctor..."
+            patrol doctor
+            
+            # 7. ตัวอย่างการรันเทส (ถ้าคุณพร้อม)
+            # patrol test -t integration_test/app_test.dart
+          EOF
+
+      - name: Cleanup VM
+        if: always()
+        run: |
+          # ปิดเครื่องหลังรันเสร็จเพื่อประหยัด RAM เครื่อง Mac
+          limactl stop ubuntu-tester
+
+# name: Run patrol automate test
 
 # on:
 #   workflow_dispatch:
-#     inputs:
-#       environment:
-#         description: "Environment"
-#         required: true
-#         type: choice
-#         options:
-#           - dev
-#           - sit
-#           - uat
-#       device:
-#         description: "Device"
-#         required: true
-#         type: string
 
-jobs:
-  test:
-    name: Execute Test Script
-    # runs-on: ubuntu-latest
-    runs-on: self-hosted
-    permissions:
-      contents: read
-      issues: write
+# # on:
+# #   workflow_dispatch:
+# #     inputs:
+# #       environment:
+# #         description: "Environment"
+# #         required: true
+# #         type: choice
+# #         options:
+# #           - dev
+# #           - sit
+# #           - uat
+# #       device:
+# #         description: "Device"
+# #         required: true
+# #         type: string
 
-    steps:
-      - name: Clean Work Space
-        run: rm -rf $GITHUB_WORKSPACE/*
+# jobs:
+#   test:
+#     name: Execute Test Script
+#     # runs-on: ubuntu-latest
+#     runs-on: self-hosted
+#     permissions:
+#       contents: read
+#       issues: write
 
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          clean: true
+#     steps:
+#       - name: Clean Work Space
+#         run: rm -rf $GITHUB_WORKSPACE/*
 
-      - name: Setup Environment Paths
-        run: |
-          echo "/opt/homebrew/bin" >> $GITHUB_PATH
-          echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
-          echo "ANDROID_HOME=$HOME/Library/Android/sdk" >> $GITHUB_ENV
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+#         with:
+#           clean: true
 
-      - name: dsfdsfdsfdsf
-        run: patrol doctor
+#       - name: Setup Environment Paths
+#         run: |
+#           echo "/opt/homebrew/bin" >> $GITHUB_PATH
+#           echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+#           echo "ANDROID_HOME=$HOME/Library/Android/sdk" >> $GITHUB_ENV
 
-      # - name: Setup Flutter
-      #   uses: subosito/flutter-action@v2.21.0
-      #   with:
-      #     flutter-version: "3.38.9"
-      #     cache: true
+#       - name: dsfdsfdsfdsf
+#         run: patrol doctor
 
-      # - name: Install FVM
-      #   run: |
-      #     dart pub global activate fvm
-      #     echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+#       # - name: Setup Flutter
+#       #   uses: subosito/flutter-action@v2.21.0
+#       #   with:
+#       #     flutter-version: "3.38.9"
+#       #     cache: true
 
-      # - name: Run setup patrol project
-      #   run: |
-      #     make -f integration_test/scripts/setup_patrol.mk setup_patrol
+#       # - name: Install FVM
+#       #   run: |
+#       #     dart pub global activate fvm
+#       #     echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+
+#       # - name: Run setup patrol project
+#       #   run: |
+#       #     make -f integration_test/scripts/setup_patrol.mk setup_patrol
