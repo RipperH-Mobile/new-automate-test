@@ -38,7 +38,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.21.0
         with:
-          flutter-version-file: ".fvmrc"
+          flutter-version: "3.38.9"
           cache: true
 
       - name: Install FVM
