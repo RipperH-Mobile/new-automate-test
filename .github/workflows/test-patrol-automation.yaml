@@ -73,6 +73,7 @@ jobs:
 
             # 6. ลง fvm
             curl -fsSL https://fvm.app/install.sh | bash
+            export PATH="$HOME/fvm/bin:$PATH"
             
             # 5. ย้ายเข้าไปในโฟลเดอร์โปรเจค
             cd ${{ github.workspace }}
