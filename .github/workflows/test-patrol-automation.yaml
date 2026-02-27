@@ -87,7 +87,7 @@ jobs:
           EOF
 
       - name: Cleanup Installed Tools in VM
-        if: always() # สำคัญ: สั่งให้ทำงานเสมอแม้ว่า Step ก่อนหน้าจะพัง
+        if: always()
         run: |
           limactl shell ubuntu-tester bash << 'EOF'
             echo "🧹 Cleaning up workspace inside Ubuntu..."
@@ -97,6 +97,18 @@ jobs:
             
             # 2. ลบ Pub Cache (เพื่อล้าง Patrol CLI และ dependencies อื่นๆ)
             rm -rf $HOME/.pub-cache
+
+            # 1. ถอนการติดตั้งแพ็กเกจที่เกี่ยวกับ OpenJDK 17 ทั้งหมด
+            sudo apt-get purge -y "openjdk-17-*"
+            
+            # 2. ลบ Dependencies อื่นๆ ที่ถูกติดตั้งมาพร้อมกับ Java แต่ตอนนี้ไม่ได้ใช้แล้ว
+            sudo apt-get autoremove -y
+            
+            # 3. ล้างแคชของ apt เพื่อคืนพื้นที่ว่างให้ VM
+            sudo apt-get clean
+            
+            # 4. เคลียร์ตัวแปร JAVA_HOME (เผื่อเซสชันนี้ยังถูกเรียกใช้อยู่)
+            unset JAVA_HOME
             
             echo "✅ Cleanup completed!"
           EOF
