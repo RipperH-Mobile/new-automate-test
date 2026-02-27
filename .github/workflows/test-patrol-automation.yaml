@@ -6,7 +6,7 @@ on:
 jobs:
   simulate-ubuntu:
     runs-on: self-hosted # รันบนเครื่อง Mac ของคุณ
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
             echo "🆕 VM not found. Creating and starting a new one..."
             limactl start --name=ubuntu-tester --tty=false template://ubuntu
           fi
-          
+
       - name: Install Tools & Run Patrol in Ubuntu
         run: |
           # สั่งงานเข้าไปใน Ubuntu VM ผ่าน limactl shell
@@ -36,6 +36,29 @@ jobs:
             # 2. Install Java 17
             sudo apt-get install -y openjdk-17-jdk
             export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+            echo "🤖 Installing Android SDK Command-line Tools..."
+            
+            # 2. สร้างโฟลเดอร์และตั้งค่า ANDROID_HOME
+            export ANDROID_HOME=$HOME/android-sdk
+            mkdir -p $ANDROID_HOME/cmdline-tools
+            
+            # 2. ดาวน์โหลด Android Command Line Tools (เวอร์ชันล่าสุดสำหรับ Linux)
+            wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+            unzip -q cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+            
+            # 2. จัดโครงสร้างโฟลเดอร์ให้ถูกต้องตามที่ Android SDK ต้องการ
+            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+            rm cmdline-tools.zip
+            
+            # 2. อัปเดต PATH ให้เรียกคำสั่ง sdkmanager และ adb ได้
+            export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
+            
+            # 2. กดยอมรับ License ทั้งหมดอัตโนมัติ (สำคัญมาก! ถ้าไม่ทำ Flutter จะ build ไม่ผ่าน)
+            yes | sdkmanager --licenses
+            
+            # 2. ติดตั้ง Packages พื้นฐาน
+            sdkmanager "platform-tools" "cmdline-tools;latest"
             
             # 3. Install Flutter (เริ่มจากศูนย์)
             git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
@@ -44,10 +67,16 @@ jobs:
             # 4. Install Patrol CLI
             flutter pub global activate patrol_cli
             export PATH="$PATH:$HOME/.pub-cache/bin"
+
+            # 6. ลง adb
+            export PATH="$ANDROID_HOME/platform-tools:$PATH"
+
+            # 6. ลง fvm
+            curl -fsSL https://fvm.app/install.sh | bash
             
             # 5. ย้ายเข้าไปในโฟลเดอร์โปรเจค
-            # Lima จะแชร์ไฟล์จาก Mac มาที่ Path เดียวกันโดยอัตโนมัติ
             cd ${{ github.workspace }}
+            fvm install
             
             # 6. ตรวจสอบความพร้อม
             echo "🚀 Final Check with Patrol Doctor..."
