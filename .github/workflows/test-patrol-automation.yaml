@@ -95,6 +95,9 @@ jobs:
         run: |
           limactl shell ubuntu-tester bash << 'EOF'
             echo "🧹 Cleaning up workspace inside Ubuntu..."
+
+            # 💡 1. ลบโฟลเดอร์โปรเจคที่เราก๊อปปี้มา (ลบผลลัพธ์จาก cp -a)
+            rm -rf $HOME/build-workspace
             
             # 1. ลบ Flutter SDK
             rm -rf $HOME/flutter
