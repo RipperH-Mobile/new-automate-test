@@ -1,4 +1,4 @@
-name: Ubuntu Simulation on Mac
+name: Ubuntu Simulation on Mac reuse
 
 on:
   workflow_dispatch: # กดรันเองเพื่อเทส
