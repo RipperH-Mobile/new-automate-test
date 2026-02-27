@@ -88,6 +88,7 @@ jobs:
             echo "📂 Copying workspace to VM internal storage for Read/Write access..."
             # 8. ย้ายเข้าไปในโฟลเดอร์โปรเจค (แก้ปัญหา Read-only)
             export VM_WORKSPACE="$HOME/build-workspace"
+            source ~/.bashrc
             mkdir -p $VM_WORKSPACE
             cp -a ${{ github.workspace }}/. $VM_WORKSPACE/
             cd $VM_WORKSPACE
@@ -97,15 +98,18 @@ jobs:
             # 7. ลง patrol
             make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
-            # 6. ตรวจสอบความพร้อม
+          EOF
+
+      - name: Check Patrol Doctor and flutter Doctor
+        run: |
+          # 6. ตรวจสอบความพร้อม
+            cd $VM_WORKSPACE
             echo "🚀 Final Check with Patrol Doctor..."
             patrol doctor
 
-            # 6. ตรวจสอบความพร้อม
+          # 6. ตรวจสอบความพร้อม
             echo "🚀 Final Check with flutter Doctor..."
-            fvm flutter doctor
-
-          EOF
+            flutter doctor
 
       - name: Cleanup Installed Tools in VM
         if: always()
