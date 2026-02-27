@@ -12,11 +12,11 @@ setup_patrol:
 	@echo "📦 Installing Dependencies..."
 	
 	@# 1.1: Add Main Dependencies
-	@fvm flutter pub add csv:^6.0.0 http:^1.5.0 mongo_dart:^0.9.4 html:^0.15.6 phone_numbers_parser:^9.0.15
+#	@fvm flutter pub add csv:^6.0.0 http:^1.5.0 mongo_dart:^0.9.4 html:^0.15.6 phone_numbers_parser:^9.0.15
 	
 	@# 1.2: Add Dev Dependencies (Patrol 4.1.0) is compatibility with patrol_cli 4.0.2
 #	@# https://patrol.leancode.co/documentation/compatibility-table
-	@fvm flutter pub add --dev patrol:^4.1.0
+#	@fvm flutter pub add --dev patrol:^4.1.0
 
 	@# 1.3: Activate CLIs
 	@echo "🔧 Activating CLIs..."
