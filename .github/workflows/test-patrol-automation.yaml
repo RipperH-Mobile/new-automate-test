@@ -76,7 +76,10 @@ jobs:
             export PATH="$HOME/fvm/bin:$PATH"
             
             # 5. ย้ายเข้าไปในโฟลเดอร์โปรเจค
-            cd ${{ github.workspace }}
+            export VM_WORKSPACE="$HOME/build-workspace"
+            mkdir -p $VM_WORKSPACE
+            cp -a ${{ github.workspace }}/. $VM_WORKSPACE/
+            cd $VM_WORKSPACE
             fvm install
             
             # 6. ตรวจสอบความพร้อม
