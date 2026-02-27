@@ -91,12 +91,17 @@ jobs:
             cd $VM_WORKSPACE
             fvm install
             
+            # 7. ลง patrol
+            make -f integration_test/scripts/setup_patrol.mk setup_patrol
+
             # 6. ตรวจสอบความพร้อม
             echo "🚀 Final Check with Patrol Doctor..."
             patrol doctor
-            
-            # 7. ลง patrol
-            make -f integration_test/scripts/setup_patrol.mk setup_patrol
+
+            # 6. ตรวจสอบความพร้อม
+            echo "🚀 Final Check with flutter Doctor..."
+            fvm flutter doctor
+
           EOF
 
       - name: Cleanup Installed Tools in VM
