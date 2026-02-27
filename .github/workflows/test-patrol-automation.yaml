@@ -103,13 +103,16 @@ jobs:
       - name: Check Patrol Doctor and flutter Doctor
         run: |
           # 6. ตรวจสอบความพร้อม
-            cd $VM_WORKSPACE
-            echo "🚀 Final Check with Patrol Doctor..."
-            patrol doctor
+            limactl shell ubuntu-tester bash << 'EOF'
+              source ~/.bashrc
+              cd $VM_WORKSPACE
+              echo "🚀 Final Check with Patrol Doctor..."
+              patrol doctor
 
-          # 6. ตรวจสอบความพร้อม
-            echo "🚀 Final Check with flutter Doctor..."
-            flutter doctor
+            # 6. ตรวจสอบความพร้อม
+              echo "🚀 Final Check with flutter Doctor..."
+              flutter doctor
+            EOF
 
       - name: Cleanup Installed Tools in VM
         if: always()
