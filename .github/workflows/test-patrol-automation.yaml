@@ -37,65 +37,83 @@ jobs:
             sudo apt-get install -y openjdk-17-jdk
             export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)
 
-            echo "🤖 Installing Android SDK Command-line Tools..."
+            echo "🤖 Setting up Android SDK (Clean Install Mode)..."
             
-            # 2. สร้างโฟลเดอร์และตั้งค่า ANDROID_HOME
+            # กำหนด Path ให้ชัวร์
             export ANDROID_HOME=$HOME/android-sdk
+
+            # --- เริ่มส่วนที่ปรับปรุงใหม่: ล้างและจัดโครงสร้าง cmdline-tools ---
+            # 1. ลบโฟลเดอร์เก่าออกให้หมดเพื่อป้องกันโฟลเดอร์ซ้อน (latest-2)
+            rm -rf $ANDROID_HOME/cmdline-tools
+            
+            # 2. สร้างโครงสร้างใหม่
             mkdir -p $ANDROID_HOME/cmdline-tools
             
-            # 2. ดาวน์โหลด Android Command Line Tools (เวอร์ชันล่าสุดสำหรับ Linux)
-            wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
+            # 3. ดาวน์โหลด (ถ้ายังไม่มีไฟล์ใน /tmp)
+            if [ ! -f /tmp/cmdline-tools.zip ]; then
+              wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
+            fi
+            
+            # 4. แตกไฟล์ Zip ลงไปในโฟลเดอร์ cmdline-tools
             unzip -q -o /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
             
-            # 2. จัดโครงสร้างโฟลเดอร์ให้ถูกต้องตามที่ Android SDK ต้องการ
+            # 5. ย้ายให้ถูกชั้น (จาก cmdline-tools/cmdline-tools ไปเป็น cmdline-tools/latest)
             mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-            rm /tmp/cmdline-tools.zip
+            # -----------------------------------------------------------
             
-            # 2. อัปเดต PATH ให้เรียกคำสั่ง sdkmanager และ adb ได้
-            export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
+            # อัปเดต PATH เพื่อให้เรียกใช้ sdkmanager ได้ทันที
+            export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
             
-            # 2. กดยอมรับ License ทั้งหมดอัตโนมัติ (สำคัญมาก! ถ้าไม่ทำ Flutter จะ build ไม่ผ่าน)
-            yes | sdkmanager --licenses
+            echo "📝 Accepting Licenses..."
+            yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
             
-            # 2. ติดตั้ง Packages พื้นฐาน
-            sdkmanager "platform-tools" "cmdline-tools;latest"
-            rm -f $ANDROID_HOME/platform-tools/adb
-            ln -s /usr/bin/adb $ANDROID_HOME/platform-tools/adb
+            echo "📥 Installing Specified Android SDK Components..."
+            # เพิ่ม "emulator" เข้าไปในลิสต์เพื่อให้สร้าง AVD ได้ในภายหลัง
+            sdkmanager --sdk_root=$ANDROID_HOME "platforms;android-36" "build-tools;36.1.0" "platform-tools"
             
-            # 3. Install Flutter (เริ่มจากศูนย์)
-            git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
-            export PATH="$PATH:$HOME/flutter/bin"
+            # เชื่อมต่อ adb
+            export PATH="$ANDROID_HOME/platform-tools:$PATH"
+            
+            # 3. Install Flutter
+            if [ ! -d "$HOME/flutter" ]; then
+              git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
+            fi
+            export PATH="$HOME/flutter/bin:$PATH"
             
             # 4. Install Patrol CLI
             flutter pub global activate patrol_cli
             export PATH="$PATH:$HOME/.pub-cache/bin"
 
-            # 6. ลง adb
-            export PATH="$ANDROID_HOME/platform-tools:$PATH"
-
-            # 6. ลง fvm
-            curl -fsSL https://fvm.app/install.sh | bash
+            # 5. ลง fvm
+            if [ ! -d "$HOME/fvm" ]; then
+              curl -fsSL https://fvm.app/install.sh | bash
+            fi
             export PATH="$HOME/fvm/bin:$PATH"
 
-            echo "🔑 Setting up SSH Keys for GitHub access..."
-            # 7. ดึง SSH Key จากเครื่อง Mac มาให้ Ubuntu ยืมใช้ เพื่อให้โหลด Package จาก Git ได้
+            echo "🔑 Setting up SSH Keys..."
             mkdir -p $HOME/.ssh
             cp /Users/sorawit/.ssh/id_rsa $HOME/.ssh/ 2>/dev/null || true
             cp /Users/sorawit/.ssh/id_ed25519 $HOME/.ssh/ 2>/dev/null || true
             chmod 600 $HOME/.ssh/id_* 2>/dev/null || true
-            ssh-keyscan github.com >> $HOME/.ssh/known_hosts
+            ssh-keyscan github.com >> $HOME/.ssh/known_hosts 2>/dev/null
 
-            echo "📂 Copying workspace to VM internal storage for Read/Write access..."
-            # 8. ย้ายเข้าไปในโฟลเดอร์โปรเจค (แก้ปัญหา Read-only)
+            echo "📂 Copying workspace to VM internal storage..."
             export VM_WORKSPACE="$HOME/build-workspace"
-            source ~/.bashrc
+            
+            # ถอยออกมาที่ HOME ก่อนเพื่อป้องกัน getcwd() failed หากอยู่ในโฟลเดอร์ที่เพิ่งถูกลบ
+            cd $HOME
             mkdir -p $VM_WORKSPACE
             cp -a ${{ github.workspace }}/. $VM_WORKSPACE/
             cd $VM_WORKSPACE
+
+            # ตั้งค่า Flutter ให้รู้จัก SDK Path
             fvm install
             fvm flutter config --android-sdk $ANDROID_HOME
             
-            # 7. ลง patrol
+            # ยอมรับ licenses ผ่าน flutter อีกรอบ
+            echo "y" | fvm flutter doctor --android-licenses
+            
+            # สั่ง Setup Patrol
             make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
           EOF
@@ -120,7 +138,7 @@ jobs:
 
             echo "🚀 Final Check with flutter Doctor..."
             # แนะนำให้ระบุ Path เต็มของ flutter หรือ fvm ไปเลยถ้ายังหาไม่เจอ
-            flutter doctor
+            flutter doctor -v
           EOF
 
       - name: Cleanup Installed Tools in VM
