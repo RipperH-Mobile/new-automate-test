@@ -31,7 +31,7 @@ jobs:
             echo "🐧 Inside Ubuntu VM: Starting Installation..."
             
             # 1. Update System
-            sudo apt-get update && sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa
+            sudo apt-get update && sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa make
             
             # 2. Install Java 17
             sudo apt-get install -y openjdk-17-jdk
