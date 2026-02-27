@@ -110,6 +110,7 @@ jobs:
       - name: Check Patrol Doctor and flutter Doctor
         run: |
           # 6. ตรวจสอบความพร้อม
+            cd $VM_WORKSPACE
             echo "🚀 Final Check with Patrol Doctor..."
             patrol doctor
 
