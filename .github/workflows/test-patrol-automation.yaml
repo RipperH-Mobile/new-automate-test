@@ -74,8 +74,17 @@ jobs:
             # 6. ลง fvm
             curl -fsSL https://fvm.app/install.sh | bash
             export PATH="$HOME/fvm/bin:$PATH"
-            
-            # 5. ย้ายเข้าไปในโฟลเดอร์โปรเจค
+
+            echo "🔑 Setting up SSH Keys for GitHub access..."
+            # 7. ดึง SSH Key จากเครื่อง Mac มาให้ Ubuntu ยืมใช้ เพื่อให้โหลด Package จาก Git ได้
+            mkdir -p $HOME/.ssh
+            cp /Users/sorawit/.ssh/id_rsa $HOME/.ssh/ 2>/dev/null || true
+            cp /Users/sorawit/.ssh/id_ed25519 $HOME/.ssh/ 2>/dev/null || true
+            chmod 600 $HOME/.ssh/id_* 2>/dev/null || true
+            ssh-keyscan github.com >> $HOME/.ssh/known_hosts
+
+            echo "📂 Copying workspace to VM internal storage for Read/Write access..."
+            # 8. ย้ายเข้าไปในโฟลเดอร์โปรเจค (แก้ปัญหา Read-only)
             export VM_WORKSPACE="$HOME/build-workspace"
             mkdir -p $VM_WORKSPACE
             cp -a ${{ github.workspace }}/. $VM_WORKSPACE/
@@ -107,6 +116,9 @@ jobs:
 
             # 💡 2. ลบ Android SDK (เพิ่มเข้ามาใหม่เพื่อให้ล้างเครื่อง 100%)
             rm -rf $HOME/android-sdk
+
+            # ลบกุญแจ SSH ที่ยืมมา
+            rm -rf $HOME/.ssh
 
             # 1. ถอนการติดตั้งแพ็กเกจที่เกี่ยวกับ OpenJDK 17 ทั้งหมด
             sudo apt-get purge -y "openjdk-17-*"
