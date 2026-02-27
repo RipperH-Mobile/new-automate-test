@@ -45,7 +45,7 @@ jobs:
             
             # 2. ดาวน์โหลด Android Command Line Tools (เวอร์ชันล่าสุดสำหรับ Linux)
             wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
-            unzip -q /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+            unzip -q -o /tmp/cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
             
             # 2. จัดโครงสร้างโฟลเดอร์ให้ถูกต้องตามที่ Android SDK ต้องการ
             mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
