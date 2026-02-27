@@ -98,6 +98,9 @@ jobs:
             # 2. ลบ Pub Cache (เพื่อล้าง Patrol CLI และ dependencies อื่นๆ)
             rm -rf $HOME/.pub-cache
 
+            # 💡 2. ลบ Android SDK (เพิ่มเข้ามาใหม่เพื่อให้ล้างเครื่อง 100%)
+            rm -rf $HOME/android-sdk
+
             # 1. ถอนการติดตั้งแพ็กเกจที่เกี่ยวกับ OpenJDK 17 ทั้งหมด
             sudo apt-get purge -y "openjdk-17-*"
             
