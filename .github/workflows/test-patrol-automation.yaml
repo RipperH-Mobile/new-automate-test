@@ -105,7 +105,7 @@ jobs:
         if: always()
         run: |
           # ปิดเครื่องหลังรันเสร็จเพื่อประหยัด RAM เครื่อง Mac แต่ไม่ Delete ทิ้ง
-          limactl stop ubuntu-tester || trueÏÏÏ
+          limactl stop ubuntu-tester || true
 
 # name: Run patrol automate test
 
