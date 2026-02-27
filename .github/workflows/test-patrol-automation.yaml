@@ -102,17 +102,26 @@ jobs:
 
       - name: Check Patrol Doctor and flutter Doctor
         run: |
-          # 6. ตรวจสอบความพร้อม
-            limactl shell ubuntu-tester bash << 'EOF'
-              source ~/.bashrc
-              cd $VM_WORKSPACE
-              echo "🚀 Final Check with Patrol Doctor..."
-              patrol doctor
+          # ประกาศ Path ที่จำเป็นอีกครั้งตรงนี้เพื่อให้เรียกใช้ใน VM ได้ชัวร์ๆ
+          limactl shell ubuntu-tester bash << 'EOF'
+            # 1. บังคับโหลดโปรไฟล์ (เผื่อไว้)
+            source ~/.bashrc
+            
+            # 2. Re-export path สำคัญ (กันพลาดถ้า .bashrc ไม่ทำงาน)
+            export ANDROID_HOME=$HOME/android-sdk
+            export PATH="$PATH:$HOME/flutter/bin:$HOME/.pub-cache/bin:$ANDROID_HOME/platform-tools:$HOME/fvm/bin"
+            export VM_WORKSPACE="$HOME/build-workspace"
 
-              # 6. ตรวจสอบความพร้อม
-              echo "🚀 Final Check with flutter Doctor..."
-              flutter doctor
-            EOF
+            echo "🚀 Moving to workspace: $VM_WORKSPACE"
+            cd $VM_WORKSPACE || exit 1
+
+            echo "🚀 Final Check with Patrol Doctor..."
+            patrol doctor
+
+            echo "🚀 Final Check with flutter Doctor..."
+            # แนะนำให้ระบุ Path เต็มของ flutter หรือ fvm ไปเลยถ้ายังหาไม่เจอ
+            flutter doctor
+          EOF
 
       - name: Cleanup Installed Tools in VM
         if: always()
