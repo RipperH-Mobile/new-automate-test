@@ -52,8 +52,8 @@ jobs:
             echo "🚀 Final Check with Patrol Doctor..."
             patrol doctor
             
-            # 7. ตัวอย่างการรันเทส (ถ้าคุณพร้อม)
-            # patrol test -t integration_test/app_test.dart
+            # 7. ลง patrol
+            make -f integration_test/scripts/setup_patrol.mk setup_patrol
           EOF
 
       - name: Cleanup VM
