@@ -11,15 +11,16 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Reset & Boot Ubuntu VM (Lima)
+      - name: Start Ubuntu VM (Lima)
         run: |
-          # 1. ลบเครื่องเก่าทิ้งเพื่อให้มั่นใจว่า "สะอาด 100%"
-          limactl stop -f ubuntu-tester || true
-          limactl delete ubuntu-tester || true
-          
-          # 2. สร้างและเริ่ม Ubuntu VM ใหม่ (ใช้ template มาตรฐาน)
-          # --tty=false เพื่อให้รันแบบ non-interactive ใน CI
-          limactl start --name=ubuntu-tester --tty=false template://ubuntu
+          # เช็คว่ามีเครื่อง ubuntu-tester อยู่แล้วหรือไม่
+          if limactl ls | grep -q "ubuntu-tester"; then
+            echo "♻️ VM exists. Starting it..."
+            limactl start ubuntu-tester || true
+          else
+            echo "🆕 VM not found. Creating and starting a new one..."
+            limactl start --name=ubuntu-tester --tty=false template://ubuntu
+          fi
           
       - name: Install Tools & Run Patrol in Ubuntu
         run: |
@@ -27,12 +28,12 @@ jobs:
           limactl shell ubuntu-tester bash << 'EOF'
             set -e # พังแล้วหยุดทันที
             
-            echo "🐧 Inside Ubuntu VM: Starting Clean Installation..."
+            echo "🐧 Inside Ubuntu VM: Starting Installation..."
             
             # 1. Update System
             sudo apt-get update && sudo apt-get install -y curl git unzip xz-utils zip libglu1-mesa
             
-            # 2. Install Java 17 (เหมือนที่ GitHub Actions มีให้)
+            # 2. Install Java 17
             sudo apt-get install -y openjdk-17-jdk
             export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
             
@@ -56,11 +57,26 @@ jobs:
             make -f integration_test/scripts/setup_patrol.mk setup_patrol
           EOF
 
-      - name: Cleanup VM
+      - name: Cleanup Installed Tools in VM
+        if: always() # สำคัญ: สั่งให้ทำงานเสมอแม้ว่า Step ก่อนหน้าจะพัง
+        run: |
+          limactl shell ubuntu-tester bash << 'EOF'
+            echo "🧹 Cleaning up workspace inside Ubuntu..."
+            
+            # 1. ลบ Flutter SDK
+            rm -rf $HOME/flutter
+            
+            # 2. ลบ Pub Cache (เพื่อล้าง Patrol CLI และ dependencies อื่นๆ)
+            rm -rf $HOME/.pub-cache
+            
+            echo "✅ Cleanup completed!"
+          EOF
+
+      - name: Stop VM
         if: always()
         run: |
-          # ปิดเครื่องหลังรันเสร็จเพื่อประหยัด RAM เครื่อง Mac
-          limactl stop ubuntu-tester
+          # ปิดเครื่องหลังรันเสร็จเพื่อประหยัด RAM เครื่อง Mac แต่ไม่ Delete ทิ้ง
+          limactl stop ubuntu-tester || trueÏÏÏ
 
 # name: Run patrol automate test
 
