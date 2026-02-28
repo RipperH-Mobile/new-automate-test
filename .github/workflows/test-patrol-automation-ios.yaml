@@ -1,4 +1,4 @@
-name: Patrol Test Android
+name: Patrol Test IOS
 
 on:
   workflow_dispatch:
