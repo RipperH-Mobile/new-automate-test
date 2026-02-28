@@ -1,0 +1,29 @@
+name: Patrol Test Android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  patrol-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ดึง Source Code ของโปรเจกต์
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # เรียกใช้ก้อน Setup ที่แยกไฟล์ไว้
+      - name: Setup Environment
+        uses: ./.github/actions/test-setup-flutter-patrol.yaml
+
+      - name: Setup Patrol
+        run: |
+          make -f integration_test/scripts/setup_patrol.mk setup_patrol
+
+      # ตรวจสอบ Dependency ของ Flutter และ Patrol
+      - name: Check Patrol Doctor and Flutter Doctor
+        run: |
+          echo "🚀 Final Check with Patrol Doctor..."
+          patrol doctor
+          echo "🚀 Final Check with Flutter Doctor..."
+          fvm flutter doctor -v
