@@ -6,6 +6,7 @@ runs:
   steps:
     # ตรวจสอบ Dependency ของ Flutter และ Patrol
     - name: Check Patrol Doctor and Flutter Doctor
+      shell: bash
       run: |
         echo "🚀 Final Check with Patrol Doctor..."
         patrol doctor
