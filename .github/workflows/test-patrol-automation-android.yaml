@@ -14,7 +14,7 @@ jobs:
 
       # เรียกใช้ก้อน Setup ที่แยกไฟล์ไว้
       - name: Setup Environment
-        uses: ./.github/actions/test-setup-flutter-patrol.yaml
+        uses: ./.github/actions/test-setup-flutter-patrol
 
       # # แก้ปัญหาโหลด Package ผ่าน SSH (เปลี่ยนเป็น HTTPS อัตโนมัติ)
       # - name: Configure Git to use HTTPS
