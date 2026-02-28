@@ -1,0 +1,13 @@
+name: "Check Patrol Doctor and Flutter Doctor"
+description: "Check dependency patrol and flutter"
+
+runs:
+  using: "composite"
+  steps:
+    # ตรวจสอบ Dependency ของ Flutter และ Patrol
+    - name: Check Patrol Doctor and Flutter Doctor
+      run: |
+        echo "🚀 Final Check with Patrol Doctor..."
+        patrol doctor
+        echo "🚀 Final Check with Flutter Doctor..."
+        fvm flutter doctor -v

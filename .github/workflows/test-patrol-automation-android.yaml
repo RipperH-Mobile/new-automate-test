@@ -16,17 +16,6 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/test-setup-flutter-patrol
 
-      # # แก้ปัญหาโหลด Package ผ่าน SSH (เปลี่ยนเป็น HTTPS อัตโนมัติ)
-      # - name: Configure Git to use HTTPS
-      #   run: git config --global url."https://github.com/".insteadOf "git@github.com:"
-
-      # # ติดตั้ง Java (จำเป็นสำหรับ Android SDK และ Gradle)
-      # - name: Setup Java 17
-      #   uses: actions/setup-java@v4
-      #   with:
-      #     distribution: "zulu"
-      #     java-version: "17"
-
       # ตั้งค่า Android SDK
       - name: Setup Android SDK
         run: |
@@ -38,28 +27,13 @@ jobs:
       - name: Add Android platform-tools to PATH
         run: echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
 
-      # # ติดตั้ง Flutter และ Dart พื้นฐานเข้าไปใน Runner
-      # - name: Setup Flutter and Dart
-      #   uses: subosito/flutter-action@v2
-      #   with:
-      #     channel: "stable"
-      #     cache: true
-
-      # # ติดตั้ง FVM
-      # - name: Install FVM
-      #   run: dart pub global activate fvm
-
-      # # ติดตั้ง Flutter SDK ตามเวอร์ชันในไฟล์ .fvm/fvm_config.json
-      # - name: Install Flutter SDK via FVM
-      #   run: fvm install
-
-      # # ยอมรับ Flutter Android Licenses
-      # - name: Configure Flutter and Accept Licenses
-      #   run: |
-      #     echo "🤖 Disabling Linux Desktop to speed up CI and clear Doctor warnings..."
-      #     fvm flutter config --no-enable-linux-desktop
-      #     echo "🤖 Accepting Flutter Android Licenses..."
-      #     yes | fvm flutter doctor --android-licenses
+      # ยอมรับ Flutter Android Licenses
+      - name: Configure Flutter and Accept Licenses
+        run: |
+          echo "🤖 Disabling Linux Desktop to speed up CI and clear Doctor warnings..."
+          fvm flutter config --no-enable-linux-desktop
+          echo "🤖 Accepting Flutter Android Licenses..."
+          yes | fvm flutter doctor --android-licenses
 
       - name: Setup Patrol
         run: |
@@ -67,8 +41,4 @@ jobs:
 
       # ตรวจสอบ Dependency ของ Flutter และ Patrol
       - name: Check Patrol Doctor and Flutter Doctor
-        run: |
-          echo "🚀 Final Check with Patrol Doctor..."
-          patrol doctor
-          echo "🚀 Final Check with Flutter Doctor..."
-          fvm flutter doctor -v
+        uses: ./.github/actions/test-doctor-flutter-patrol

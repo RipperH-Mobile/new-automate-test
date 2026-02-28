@@ -22,8 +22,4 @@ jobs:
 
       # ตรวจสอบ Dependency ของ Flutter และ Patrol
       - name: Check Patrol Doctor and Flutter Doctor
-        run: |
-          echo "🚀 Final Check with Patrol Doctor..."
-          patrol doctor
-          echo "🚀 Final Check with Flutter Doctor..."
-          fvm flutter doctor -v
+        uses: ./.github/actions/test-doctor-flutter-patrol
