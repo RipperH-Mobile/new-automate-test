@@ -69,7 +69,7 @@ jobs:
 
       - name: 📁 Upload Test Results (CSV)
         if: always() # อัปโหลดไฟล์ CSV เก็บไว้ดูย้อนหลังบน GitHub ได้เสมอ
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: patrol-test-results
           path: integration_test/test_results/*.csv
@@ -82,3 +82,5 @@ jobs:
         run: |
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
+          
+          
