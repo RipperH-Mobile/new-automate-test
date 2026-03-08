@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 void main() {
@@ -5,16 +6,16 @@ void main() {
 }
 
 void addAssets() {
-  print('📝 Configuring pubspec.yaml...');
+  log('📝 Configuring pubspec.yaml...');
   final f = File('pubspec.yaml');
   if (!f.existsSync()) {
-    print('❌ Error: pubspec.yaml not found at project root.');
+    log('❌ Error: pubspec.yaml not found at project root.');
     exit(1);
   }
   final lines = f.readAsLinesSync().toList();
   bool hasAssets = lines.any((l) => l.trim().startsWith('- assets/temp_test_data/'));
   if (hasAssets) {
-    print('   ✅ Assets already configured.');
+    log('   ✅ Assets already configured.');
     return;
   }
   int flutterIndex = lines.indexWhere((l) => l.startsWith('flutter:'));
@@ -40,7 +41,7 @@ void addAssets() {
     }
   }
   f.writeAsStringSync(lines.join('\n'));
-  print('   ✅ Assets injected successfully.');
+  log('   ✅ Assets injected successfully.');
 }
 
 /*
@@ -51,11 +52,11 @@ void main() {
 }
 
 void updatePubspecAssets() {
-  print('📝 Scanning and updating assets in pubspec.yaml...');
+  log('📝 Scanning and updating assets in pubspec.yaml...');
 
   final pubspecFile = File('pubspec.yaml');
   if (!pubspecFile.existsSync()) {
-    print('❌ Error: pubspec.yaml not found.');
+    log('❌ Error: pubspec.yaml not found.');
     exit(1);
   }
 
@@ -80,12 +81,12 @@ void updatePubspecAssets() {
 
     newAssetLines.addAll(subDirs);
   } else {
-    print('⚠️ Warning: ${rootAssetDir.path} does not exist. Skipping scan.');
+    log('⚠️ Warning: ${rootAssetDir.path} does not exist. Skipping scan.');
   }
 
   // แปลงให้เป็น Unique (กันซ้ำ)
   newAssetLines = newAssetLines.toSet().toList();
-  print('🔎 Found ${newAssetLines.length} asset paths.');
+  log('🔎 Found ${newAssetLines.length} asset paths.');
 
   // ---------------------------------------------------------
   // 2. อ่านและแก้ไขไฟล์ pubspec.yaml
@@ -135,6 +136,6 @@ void updatePubspecAssets() {
   // 3. บันทึกไฟล์
   // ---------------------------------------------------------
   pubspecFile.writeAsStringSync(lines.join('\n'));
-  print('✅ Successfully updated pubspec.yaml with dynamic assets.');
+  log('✅ Successfully updated pubspec.yaml with dynamic assets.');
 }
 */

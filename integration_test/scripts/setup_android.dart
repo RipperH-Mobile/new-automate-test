@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 void main() {
@@ -7,10 +8,10 @@ void main() {
 }
 
 void configBuildGradleFile() {
-  print('🤖 Configuring Android Gradle (build.gradle.kts)...');
+  log('🤖 Configuring Android Gradle (build.gradle.kts)...');
   final f = File('android/app/build.gradle.kts');
   if (!f.existsSync()) {
-    print('⚠️ android/app/build.gradle.kts not found (Skipping Android setup)');
+    log('⚠️ android/app/build.gradle.kts not found (Skipping Android setup)');
     return;
   }
   String content = f.readAsStringSync();
@@ -19,13 +20,13 @@ void configBuildGradleFile() {
     if (content.contains('dependencies {')) {
       const orchestratorDep = '    androidTestUtil("androidx.test:orchestrator:1.5.1")';
       content = content.replaceFirst('dependencies {', 'dependencies {\n$orchestratorDep');
-      print('   ✅ Added Orchestrator dependency.');
+      log('   ✅ Added Orchestrator dependency.');
       isModified = true;
     } else {
-      print('⚠️ dependencies block not found.');
+      log('⚠️ dependencies block not found.');
     }
   } else {
-    print('   ✅ Orchestrator dependency already exists.');
+    log('   ✅ Orchestrator dependency already exists.');
   }
   const patrolRunner = 'testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"';
   const patrolArgs = 'testInstrumentationRunnerArguments["clearPackageData"] = "true"';
@@ -33,19 +34,19 @@ void configBuildGradleFile() {
     final runnerRegExp = RegExp(r'testInstrumentationRunner\s*=\s*".*"');
     if (content.contains(runnerRegExp)) {
       content = content.replaceAll(runnerRegExp, patrolRunner);
-      print('   ✅ Updated testInstrumentationRunner to Patrol.');
+      log('   ✅ Updated testInstrumentationRunner to Patrol.');
       isModified = true;
     } else {
       if (content.contains('defaultConfig {')) {
         content = content.replaceFirst('defaultConfig {', 'defaultConfig {\n        $patrolRunner');
-        print('   ✅ Injected testInstrumentationRunner.');
+        log('   ✅ Injected testInstrumentationRunner.');
         isModified = true;
       }
     }
   }
   if (!content.contains('clearPackageData')) {
     content = content.replaceFirst(patrolRunner, '$patrolRunner\n        $patrolArgs');
-    print('   ✅ Added clearPackageData argument.');
+    log('   ✅ Added clearPackageData argument.');
     isModified = true;
   }
   // ---------------------------------------------------------
@@ -60,43 +61,43 @@ void configBuildGradleFile() {
         'testOptions {',
         'testOptions {\n        execution = "ANDROIDX_TEST_ORCHESTRATOR"',
       );
-      print('   ✅ Added execution config to existing testOptions.');
+      log('   ✅ Added execution config to existing testOptions.');
     } else {
       if (content.contains('defaultConfig {')) {
         content = content.replaceFirst('android {', 'android {\n$testOptionsBlock');
-        print('   ✅ Injected testOptions block.');
+        log('   ✅ Injected testOptions block.');
       }
     }
     isModified = true;
   } else {
-    print('   ✅ testOptions already configured.');
+    log('   ✅ testOptions already configured.');
   }
   if (isModified) {
     f.writeAsStringSync(content);
-    print('🎉 Android build.gradle.kts updated successfully!');
+    log('🎉 Android build.gradle.kts updated successfully!');
   } else {
-    print('   ℹ️ No changes needed.');
+    log('   ℹ️ No changes needed.');
   }
 }
 
 void copyAndroidTestPath() {
-  print('📂 Copying Android Test files...');
+  log('📂 Copying Android Test files...');
   final sourceFile = File('integration_test/setup/android/androidTest/java/MainActivityTest.java');
   final targetDir = Directory('android/app/src/androidTest/java');
   final targetFile = File('${targetDir.path}/MainActivityTest.java');
   if (!sourceFile.existsSync()) {
-    print('❌ Source file not found: ${sourceFile.path}');
+    log('❌ Source file not found: ${sourceFile.path}');
     exit(1);
   }
   if (!targetDir.existsSync()) {
     targetDir.createSync(recursive: true);
   }
   sourceFile.copySync(targetFile.path);
-  print('   ✅ Copied MainActivityTest.java to ${targetDir.path}');
+  log('   ✅ Copied MainActivityTest.java to ${targetDir.path}');
 }
 
 void fixGradleToolchain() {
-  print('☕ Configuring Gradle Java Toolchain Resolver (Kotlin DSL)...');
+  log('☕ Configuring Gradle Java Toolchain Resolver (Kotlin DSL)...');
   File f = File('android/settings.gradle.kts');
   bool isKotlin = true;
   if (!f.existsSync()) {
@@ -104,12 +105,12 @@ void fixGradleToolchain() {
     isKotlin = false;
   }
   if (!f.existsSync()) {
-    print('⚠️ android/settings.gradle(.kts) not found!');
+    log('⚠️ android/settings.gradle(.kts) not found!');
     return;
   }
   String content = f.readAsStringSync();
   if (content.contains('foojay-resolver-convention')) {
-    print('   ✅ Toolchain resolver already configured.');
+    log('   ✅ Toolchain resolver already configured.');
     return;
   }
   String pluginLine;
@@ -121,13 +122,13 @@ void fixGradleToolchain() {
   if (content.contains('plugins {')) {
     content = content.replaceFirst('plugins {', 'plugins {\n$pluginLine');
     f.writeAsStringSync(content);
-    print('   ✅ Injected plugin into existing plugins block.');
+    log('   ✅ Injected plugin into existing plugins block.');
   } else {
     if (content.contains('pluginManagement {')) {
       String newBlock = isKotlin ? '\nplugins {\n$pluginLine\n}\n' : '\nplugins {\n$pluginLine\n}\n';
 
       f.writeAsStringSync(content + newBlock);
-      print('   ✅ Appended new plugins block.');
+      log('   ✅ Appended new plugins block.');
     }
   }
 }
