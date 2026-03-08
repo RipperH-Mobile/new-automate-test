@@ -83,4 +83,21 @@ jobs:
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
           
+
+      - name: 🔧 Setup FVM (Flutter Version Management)
+        run: dart pub global activate fvm
+
+      # ----------------------------------------------------
+      # ✨ เพิ่ม Step นี้เข้าไปเพื่อปลดล็อก Permission denied
+      # ----------------------------------------------------
+      - name: 🔑 Setup SSH Key for Private Packages
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: ⚙️ Setup Patrol & Dependencies
+        run: |
+          make -f integration_test/scripts/setup_patrol.mk setup_patrol
+          
+          
           
