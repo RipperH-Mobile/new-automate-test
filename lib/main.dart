@@ -15,7 +15,6 @@ Future<void> main() async {
   await App.initialize();
   await App.run();
 
-  // Check first routing, when authenticated, go to home page. If not authenticated, go to get started page.
   // And check database version to migration.
   await Orchestrator.run(OrchestratorTaskType.launchApp);
 }
