@@ -1,4 +1,4 @@
-name: Patrol Android Automate Test
+name: Patrol Automate Test (iOS Cloud)
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  android-test:
-    runs-on: macos-13
+  ios-test:
+    runs-on: macos-latest # ใช้เครื่อง Mac (Apple Silicon) ของ GitHub
 
     steps:
       - name: 📥 Checkout repository
@@ -28,7 +28,6 @@ jobs:
       - name: 🔧 Setup FVM (Flutter Version Management)
         run: dart pub global activate fvm
 
-      # 📍 ย้าย SSH Key มาไว้ตรงนี้ ก่อนที่จะทำการดึง Dependencies
       - name: 🔑 Setup SSH Key for Private Packages
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -52,22 +51,20 @@ jobs:
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
 
-
-      - name: 📱 Run Patrol on Android Emulator
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          script: | 
-            echo "✅ Emulator is ready. Giving script execution permissions..."
-            chmod +x ./integration_test/scripts/run_test.sh
-            chmod +x ./integration_test/scripts/run_test_batch.sh
-            chmod +x ./integration_test/scripts/run_test_single.sh
-            
-            echo "🚀 Starting Automate Test Suite..."
-            ./integration_test/scripts/run_test.sh android sit integration_test/test_suites/suite_feature_account_test.dart
+      - name: 📱 Run Patrol on iOS Simulator
+        run: |
+          echo "✅ Booting iOS Simulator..."
+          # บูท iPhone 15 simulator ที่มีมาให้กับ macos-latest
+          xcrun simctl boot "iPhone 15" || true
+          
+          echo "🚀 Giving script execution permissions..."
+          chmod +x ./integration_test/scripts/run_test.sh
+          chmod +x ./integration_test/scripts/run_test_batch.sh
+          chmod +x ./integration_test/scripts/run_test_single.sh
+          
+          echo "🚀 Starting Automate Test Suite for iOS..."
+          # สั่งรันเทสบน iOS (17.5 คือเวอร์ชันล่าสุดบน runner ปัจจุบัน)
+          ./integration_test/scripts/run_test.sh ios 17.5 sit integration_test/test_suites/suite_feature_account_test.dart
 
       - name: 📁 Upload Test Results (CSV)
         if: always()
@@ -84,4 +81,3 @@ jobs:
         run: |
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
-      
