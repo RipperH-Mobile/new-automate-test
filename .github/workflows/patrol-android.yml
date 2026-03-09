@@ -3,12 +3,12 @@ name: Patrol Android Automate Test
 on:
   push:
     branches:
-      - 'test/automate' # รันอัตโนมัติเมื่อ push เข้า branch นี้
-  workflow_dispatch: # ทำให้มีปุ่มกด Run manual บนเว็บ GitHub ได้
+      - 'test/automate'
+  workflow_dispatch:
 
 jobs:
   android-test:
-    runs-on: ubuntu-latest # ใช้ Ubuntu เพราะรัน Android Emulator ได้ไวและประหยัดโควต้ากว่า Mac
+    runs-on: ubuntu-latest
 
     steps:
       - name: 📥 Checkout repository
@@ -18,25 +18,27 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
-          java-version: '17' # Android build มักใช้ Java 17
+          java-version: '17'
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # flutter-version: '3.19.0' # ปลดคอมเมนต์แล้วระบุเวอร์ชันถ้าโปรเจกต์ฟิกซ์ไว้
 
       - name: 🔧 Setup FVM (Flutter Version Management)
-        # เนื่องจากใน setup_patrol.mk ของคุณมีการใช้คำสั่ง fvm เราจึงต้องติดตั้ง fvm ลงใน Runner ด้วย
         run: dart pub global activate fvm
+
+      # 📍 ย้าย SSH Key มาไว้ตรงนี้ ก่อนที่จะทำการดึง Dependencies
+      - name: 🔑 Setup SSH Key for Private Packages
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: ⚙️ Setup Patrol & Dependencies
         run: |
-          # รันคำสั่ง Setup ผ่าน Makefile ของคุณที่มีอยู่แล้ว
           make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
       - name: 📝 Create .env file for Testing
-        # สร้างไฟล์ .env.sit ตามที่ ConfigEnvUtil.dart ต้องการ
         run: |
           echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
           echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
@@ -64,11 +66,10 @@ jobs:
             chmod +x ./integration_test/scripts/run_test_single.sh
             
             echo "🚀 Starting Automate Test Suite..."
-            # สั่งรันเทส suite ของ account เป็นตัวอย่าง (สามารถเพิ่ม/เปลี่ยน path ได้)
             ./integration_test/scripts/run_test.sh android sit integration_test/test_suites/suite_feature_account_test.dart
 
       - name: 📁 Upload Test Results (CSV)
-        if: always() # อัปโหลดไฟล์ CSV เก็บไว้ดูย้อนหลังบน GitHub ได้เสมอ
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: patrol-test-results
@@ -76,28 +77,10 @@ jobs:
           retention-days: 7
 
       - name: 💬 Send Summary to Discord
-        if: always() # บังคับรันเสมอเพื่อส่งผลลัพธ์ไม่ว่าจะ Pass หรือ Fail
+        if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
-          
-
-      - name: 🔧 Setup FVM (Flutter Version Management)
-        run: dart pub global activate fvm
-
-            # ----------------------------------------------------
-            # ✨ ติดตั้ง SSH Key ให้ Runner เพื่อไขเข้า Private Repo
-            # ----------------------------------------------------
-      - name: 🔑 Setup SSH Key for Private Packages
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: ⚙️ Setup Patrol & Dependencies
-        run: |
-              make -f integration_test/scripts/setup_patrol.mk setup_patrol
-          
-            
-          
+      
