@@ -53,19 +53,20 @@ jobs:
 
       - name: 📱 Run Patrol on iOS Simulator
         run: |
-          echo "✅ Booting iOS Simulator..."
-          # บูท iPhone 15 simulator ที่มีมาให้กับ macos-latest
-          xcrun simctl boot "iPhone 15" || true
-          
-          echo "🚀 Giving script execution permissions..."
-          chmod +x ./integration_test/scripts/run_test.sh
-          chmod +x ./integration_test/scripts/run_test_batch.sh
-          chmod +x ./integration_test/scripts/run_test_single.sh
-          
-          echo "🚀 Starting Automate Test Suite for iOS..."
-          # สั่งรันเทสบน iOS (17.5 คือเวอร์ชันล่าสุดบน runner ปัจจุบัน)
-          ./integration_test/scripts/run_test.sh ios 17.5 sit integration_test/test_suites/suite_feature_account_test.dart
-
+            echo "✅ Booting iOS Simulator..."
+            # ดึง UUID ของ iPhone เครื่องแรกที่มีอยู่ในระบบและสั่ง Boot อัตโนมัติ (ชัวร์กว่าการฟิกซ์ชื่อเครื่อง)
+            DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
+            echo "Booting Simulator UUID: $DEVICE_UUID"
+            xcrun simctl boot $DEVICE_UUID || true
+            
+            echo "🚀 Giving script execution permissions..."
+            chmod +x ./integration_test/scripts/run_test.sh
+            chmod +x ./integration_test/scripts/run_test_batch.sh
+            chmod +x ./integration_test/scripts/run_test_single.sh
+            
+            echo "🚀 Starting Automate Test Suite for iOS..."
+            # 🚨 ตัดคำว่า integration_test/ ออกจาก argument ตัวสุดท้าย 🚨
+            ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
       - name: 📁 Upload Test Results (CSV)
         if: always()
         uses: actions/upload-artifact@v4
