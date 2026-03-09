@@ -22,8 +22,6 @@ jobs:
 
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
 
       - name: 🔧 Setup FVM (Flutter Version Management)
         run: dart pub global activate fvm
@@ -50,6 +48,16 @@ jobs:
           echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
+
+
+      - name: 🧹 Clean Project Cache
+        run: |
+            echo "Cleaning Flutter project..."
+            fvm flutter clean
+            fvm flutter pub get
+            cd ios
+            rm -rf Pods Podfile.lock
+            pod install --repo-update
 
       - name: 📱 Run Patrol on iOS Simulator
         run: |
