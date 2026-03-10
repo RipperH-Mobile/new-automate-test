@@ -1,4 +1,4 @@
-name: Patrol Automate Test (iOS Cloud)
+name: Patrol Automate Test (iOS & Android)
 
 on:
   push:
@@ -8,8 +8,7 @@ on:
 
 jobs:
   ios-test:
-    runs-on: macos-latest # ใช้เครื่อง Mac (Apple Silicon) ของ GitHub
-
+    runs-on: macos-latest
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
@@ -23,19 +22,18 @@ jobs:
       - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
 
-      - name: 🔧 Setup FVM (Flutter Version Management)
+      - name: 🔧 Setup FVM
         run: dart pub global activate fvm
 
-      - name: 🔑 Setup SSH Key for Private Packages
+      - name: 🔑 Setup SSH Key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: ⚙️ Setup Patrol & Dependencies
-        run: |
-          make -f integration_test/scripts/setup_patrol.mk setup_patrol
+        run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
-      - name: 📝 Create .env file for Testing
+      - name: 📝 Create .env file
         run: |
           echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
           echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
@@ -49,55 +47,119 @@ jobs:
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
 
-
-      - name: 🧹 Clean Project Cache
-        run: |
-            echo "Cleaning Flutter project..."
-            fvm flutter clean
-            fvm flutter pub get
-            cd ios
-            rm -rf Pods Podfile.lock
-            pod install --repo-update
       - name: 🍏 Fix & Clean iOS Pods
         run: |
-            echo "Cleaning Flutter & iOS Pods..."
-            fvm flutter clean
-            fvm flutter pub get
-            cd ios
-            rm -rf Podfile.lock Pods
-            
-            # บังคับตั้งค่า Target ต่ำสุดเป็น iOS 13 เพื่อป้องกัน Plugin บางตัวแครช
-            sed -i '' "s/^platform :ios, .*/platform :ios, '13.0'/g" Podfile || true
-            
-            pod install --repo-update
+          fvm flutter clean
+          fvm flutter pub get
+          cd ios
+          rm -rf Podfile.lock Pods
+          sed -i '' "s/^platform :ios, .*/platform :ios, '14.0'/g" Podfile || true
+          pod install --repo-update
+
       - name: 📱 Run Patrol on iOS Simulator
         run: |
-            echo "✅ Booting iOS Simulator..."
-            # ดึง UUID ของ iPhone เครื่องแรกที่มีอยู่ในระบบและสั่ง Boot อัตโนมัติ (ชัวร์กว่าการฟิกซ์ชื่อเครื่อง)
-            DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
-            echo "Booting Simulator UUID: $DEVICE_UUID"
-            xcrun simctl boot $DEVICE_UUID || true
-            
-            echo "🚀 Giving script execution permissions..."
-            chmod +x ./integration_test/scripts/run_test.sh
-            chmod +x ./integration_test/scripts/run_test_batch.sh
-            chmod +x ./integration_test/scripts/run_test_single.sh
-            
-            echo "🚀 Starting Automate Test Suite for iOS..."
-            # 🚨 ตัดคำว่า integration_test/ ออกจาก argument ตัวสุดท้าย 🚨
-            ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
-      - name: 📁 Upload Test Results (CSV)
+          DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
+          xcrun simctl boot $DEVICE_UUID || true
+          
+          chmod +x ./integration_test/scripts/run_test.sh
+          chmod +x ./integration_test/scripts/run_test_batch.sh
+          chmod +x ./integration_test/scripts/run_test_single.sh
+          
+          fvm dart pub global activate patrol_cli
+          
+          ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
+
+      - name: 📁 Upload iOS Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: patrol-test-results
+          name: patrol-test-results-ios
           path: integration_test/test_results/*.csv
           retention-days: 7
 
-      - name: 💬 Send Summary to Discord
+      - name: 💬 Send iOS Summary to Discord
         if: always()
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
+
+
+#  android-test:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: 📥 Checkout repository
+#        uses: actions/checkout@v3
+#
+#      - name: ☕ Setup Java
+#        uses: actions/setup-java@v3
+#        with:
+#          distribution: 'zulu'
+#          java-version: '17'
+#
+#      - name: 🐦 Setup Flutter
+#        uses: subosito/flutter-action@v2
+#
+#      - name: 🔧 Setup FVM
+#        run: dart pub global activate fvm
+#
+#      - name: 🔑 Setup SSH Key
+#        uses: webfactory/ssh-agent@v0.9.0
+#        with:
+#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#
+#      - name: ⚙️ Setup Patrol & Dependencies
+#        run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
+#
+#      - name: 📝 Create .env file
+#        run: |
+#          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
+#          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_EMAIL_LOGS=emaillogs" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_ACCOUNTS=accounts" >> integration_test/.env.sit
+#          echo "API_URL_BASE=${{ secrets.API_URL_BASE }}" >> integration_test/.env.sit
+#          echo "API_URL_AUTH_OTP=/auth/otp" >> integration_test/.env.sit
+#          echo "API_URL_AUTH_SIGN_IN=/auth/sign-in" >> integration_test/.env.sit
+#          echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
+#          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
+#          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
+#
+#      - name: 🚀 Enable KVM
+#        run: |
+#          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+#          sudo udevadm control --reload-rules || true
+#          sudo udevadm trigger --name-match=kvm || true
+#
+#      - name: 📱 Run Patrol on Android Emulator
+#        uses: reactivecircus/android-emulator-runner@v2
+#        with:
+#          api-level: 33
+#          target: google_apis
+#          arch: x86_64
+#          profile: pixel_6
+#          script: |
+#            chmod +x ./integration_test/scripts/run_test.sh
+#            chmod +x ./integration_test/scripts/run_test_batch.sh
+#            chmod +x ./integration_test/scripts/run_test_single.sh
+#
+#            fvm dart pub global activate patrol_cli
+#
+#            ./integration_test/scripts/run_test.sh android sit integration_test/test_suites/suite_feature_account_test.dart
+#
+#      - name: 📁 Upload Android Results
+#        if: always()
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: patrol-test-results-android
+#          path: integration_test/test_results/*.csv
+#          retention-days: 7
+#
+#      - name: 💬 Send Android Summary to Discord
+#        if: always()
+#        env:
+#          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+#        run: |
+#          chmod +x integration_test/scripts/send_discord_summary.sh
+#          ./integration_test/scripts/send_discord_summary.sh
