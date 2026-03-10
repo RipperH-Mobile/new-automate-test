@@ -46,38 +46,59 @@ jobs:
           echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
+          
+          cp integration_test/.env.sit .env
 
-      # 👇 [สำคัญ!] สร้างไฟล์ GoogleService-Info.plist เพื่อให้ Firebase ฝั่ง iOS ไม่พัง
       - name: 📝 Inject GoogleService-Info.plist
         run: |
           echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS }}" > ios/Runner/GoogleService-Info.plist
 
       - name: 🍏 Fix & Clean iOS Pods
         run: |
-          fvm flutter clean
-          fvm flutter pub get
-          cd ios
-          rm -rf Podfile.lock Pods build/
-          sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
-          
-          # 👇 [สำคัญ!] ปิด Code Signing ชั่วคราวเพื่อรันบน Simulator ให้ผ่าน
-          sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' Runner.xcodeproj/project.pbxproj || true
-          sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' Runner.xcodeproj/project.pbxproj || true
-          
-          pod install --repo-update
+            fvm flutter clean
+            fvm flutter pub get
+            cd ios
+            rm -rf Podfile.lock Pods build/
+            sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
+            
+            # 👇 [เพิ่มส่วนนี้] บังคับปิด Code Signing สำหรับ Simulator
+            sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' Runner.xcodeproj/project.pbxproj || true
+            sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' Runner.xcodeproj/project.pbxproj || true
+            
+            # 👇 [เพิ่มส่วนนี้] สคริปต์แก้ปัญหา Pods ทุกตัวให้รองรับ iOS 15.0 ป้องกันการแครช
+            cat << 'EOF' >> Podfile
+            
+            post_install do |installer|
+            installer.pods_project.targets.each do |target|
+             target.build_configurations.each do |config|
+               config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+               config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
+             end
+            end
+            end
+            EOF
+            
+            pod install --repo-update
 
       - name: 📱 Run Patrol on iOS Simulator
         run: |
-          DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
-          xcrun simctl boot $DEVICE_UUID || true
-          
-          chmod +x ./integration_test/scripts/run_test.sh
-          chmod +x ./integration_test/scripts/run_test_batch.sh
-          chmod +x ./integration_test/scripts/run_test_single.sh
-          
-          fvm dart pub global activate patrol_cli 4.1.0
-          
-          ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
+                DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
+                xcrun simctl boot $DEVICE_UUID || true
+                
+                chmod +x ./integration_test/scripts/run_test.sh
+                
+                fvm dart pub global activate patrol_cli 4.1.0
+                
+                # ใส่ --verbose เพื่อให้พ่น Log ตัวแดงออกมาให้เห็นชัดๆ
+                ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
+            
+      - name: 📁 Upload Patrol Error Log
+        if: failure() # ทำงานเฉพาะตอนที่ Build พัง
+        uses: actions/upload-artifact@v4
+        with:
+            name: patrol-error-log
+            path: /Users/runner/.pub-cache/log/pub_log.txt
+            retention-days: 3
 
       - name: 📁 Upload iOS Results
         if: always()
@@ -95,10 +116,6 @@ jobs:
           chmod +x integration_test/scripts/send_discord_summary.sh
           ./integration_test/scripts/send_discord_summary.sh
 
-
-  # ==========================================
-  # 🤖 JOB 2: รันเทสบน Android Emulator (ใช้ Self-hosted ของคุณ)
-  # ==========================================
 #  android-test:
 #    runs-on: self-hosted # 👈 กลับไปใช้เครื่องเซิร์ฟเวอร์ของคุณที่มี Android SDK/KVM สมบูรณ์
 #    steps:
