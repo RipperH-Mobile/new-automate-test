@@ -58,7 +58,18 @@ jobs:
             cd ios
             rm -rf Pods Podfile.lock
             pod install --repo-update
-
+      - name: 🍏 Fix & Clean iOS Pods
+        run: |
+            echo "Cleaning Flutter & iOS Pods..."
+            fvm flutter clean
+            fvm flutter pub get
+            cd ios
+            rm -rf Podfile.lock Pods
+            
+            # บังคับตั้งค่า Target ต่ำสุดเป็น iOS 13 เพื่อป้องกัน Plugin บางตัวแครช
+            sed -i '' "s/^platform :ios, .*/platform :ios, '13.0'/g" Podfile || true
+            
+            pod install --repo-update
       - name: 📱 Run Patrol on iOS Simulator
         run: |
             echo "✅ Booting iOS Simulator..."
