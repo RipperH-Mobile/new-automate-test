@@ -53,7 +53,7 @@ jobs:
           fvm flutter pub get
           cd ios
           rm -rf Podfile.lock Pods
-          sed -i '' "s/^platform :ios, .*/platform :ios, '14.0'/g" Podfile || true
+          sed -i '' "s/^platform :ios, .*/platform :ios, '15.5'/g" Podfile || true
           pod install --repo-update
 
       - name: 📱 Run Patrol on iOS Simulator
