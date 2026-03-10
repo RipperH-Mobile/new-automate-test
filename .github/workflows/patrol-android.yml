@@ -47,18 +47,23 @@ jobs:
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
 
-      - name: 📝 Create GoogleService-Info.plist
+      # 👇 [สำคัญ!] สร้างไฟล์ GoogleService-Info.plist เพื่อให้ Firebase ฝั่ง iOS ไม่พัง
+      - name: 📝 Inject GoogleService-Info.plist
         run: |
-          echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS}}" > ios/Runner/GoogleService-Info.plist
+          echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS }}" > ios/Runner/GoogleService-Info.plist
 
       - name: 🍏 Fix & Clean iOS Pods
         run: |
           fvm flutter clean
-          rm -rf build/
           fvm flutter pub get
           cd ios
-          rm -rf Podfile.lock Pods
-          sed -i '' "s/^platform :ios, .*/platform :ios, '15.5'/g" Podfile || true
+          rm -rf Podfile.lock Pods build/
+          sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
+          
+          # 👇 [สำคัญ!] ปิด Code Signing ชั่วคราวเพื่อรันบน Simulator ให้ผ่าน
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' Runner.xcodeproj/project.pbxproj || true
+          sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' Runner.xcodeproj/project.pbxproj || true
+          
           pod install --repo-update
 
       - name: 📱 Run Patrol on iOS Simulator
@@ -91,8 +96,11 @@ jobs:
           ./integration_test/scripts/send_discord_summary.sh
 
 
+  # ==========================================
+  # 🤖 JOB 2: รันเทสบน Android Emulator (ใช้ Self-hosted ของคุณ)
+  # ==========================================
 #  android-test:
-#    runs-on: ubuntu-latest
+#    runs-on: self-hosted # 👈 กลับไปใช้เครื่องเซิร์ฟเวอร์ของคุณที่มี Android SDK/KVM สมบูรณ์
 #    steps:
 #      - name: 📥 Checkout repository
 #        uses: actions/checkout@v3
@@ -131,25 +139,19 @@ jobs:
 #          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
 #          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
 #
-#      - name: 🚀 Enable KVM
-#        run: |
-#          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-#          sudo udevadm control --reload-rules || true
-#          sudo udevadm trigger --name-match=kvm || true
-#
 #      - name: 📱 Run Patrol on Android Emulator
 #        uses: reactivecircus/android-emulator-runner@v2
 #        with:
 #          api-level: 33
 #          target: google_apis
-#          arch: x86_64
+#          arch: arm64-v8a # 👈 แก้ตรงนี้ตามเครื่อง self-hosted ของคุณ (ถ้าใช้ Mac M1/M2 ใช้ arm64-v8a, ถ้าใช้ Intel/Windows/Linux ใช้ x86_64)
 #          profile: pixel_6
 #          script: |
 #            chmod +x ./integration_test/scripts/run_test.sh
 #            chmod +x ./integration_test/scripts/run_test_batch.sh
 #            chmod +x ./integration_test/scripts/run_test_single.sh
 #
-#            fvm dart pub global activate patrol_cli
+#            fvm dart pub global activate patrol_cli 4.1.0
 #
 #            ./integration_test/scripts/run_test.sh android sit integration_test/test_suites/suite_feature_account_test.dart
 #
