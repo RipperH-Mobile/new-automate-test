@@ -65,7 +65,7 @@ jobs:
           chmod +x ./integration_test/scripts/run_test_batch.sh
           chmod +x ./integration_test/scripts/run_test_single.sh
           
-          fvm dart pub global activate patrol_cli
+          fvm dart pub global activate patrol_cli 4.1.0
           
           ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
 
