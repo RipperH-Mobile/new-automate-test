@@ -50,6 +50,7 @@ jobs:
       - name: 🍏 Fix & Clean iOS Pods
         run: |
           fvm flutter clean
+          rm -rf build/
           fvm flutter pub get
           cd ios
           rm -rf Podfile.lock Pods
