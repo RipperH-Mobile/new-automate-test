@@ -47,6 +47,10 @@ jobs:
           echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
           echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
 
+      - name: 📝 Create GoogleService-Info.plist
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS}}" > ios/Runner/GoogleService-Info.plist
+
       - name: 🍏 Fix & Clean iOS Pods
         run: |
           fvm flutter clean
