@@ -56,7 +56,7 @@ jobs:
       - name: 🍏 Fix & Clean iOS Pods
         run: |   
             fvm flutter clean
-            fvm flutter pub get
+            fvm flutter pub get   
             cd ios
             rm -rf Podfile.lock Pods build/
             sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
