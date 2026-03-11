@@ -47,7 +47,7 @@ jobs:
 #          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
 #          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
           
-          cp integration_test/.env.sit .env
+#          cp integration_test/.env.sit .env
 
       - name: 📝 Inject GoogleService-Info.plist
         run: |
