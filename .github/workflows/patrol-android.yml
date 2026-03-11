@@ -33,8 +33,8 @@ jobs:
       - name: ⚙️ Setup Patrol & Dependencies
         run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
-      - name: 📝 Create .env file
-        run: |
+#      - name: 📝 Create .env file
+#        run: |
 #          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
 #          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
 #          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
