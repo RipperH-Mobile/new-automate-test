@@ -51,7 +51,7 @@ jobs:
 
       - name: 📝 Inject GoogleService-Info.plist
         run: |
-          echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS }}" > ios/Runner/GoogleService-Info.plist
+            echo "${{ secrets.GOOGLE_SERVICE_INFO_IOS }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
 
       - name: 🍏 Fix & Clean iOS Pods
         run: |   
