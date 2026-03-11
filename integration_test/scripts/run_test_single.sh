@@ -67,8 +67,7 @@ if [ "$platform" == "android" ]; then
 
 elif [ "$platform" == "ios" ]; then
     echo "2. Running Patrol (iOS $ios_version) for Scheme: $env / Bundle ID: $IOS_BUNDLE_ID..."
-    patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=RESULT_FILENAME=$DYNAMIC_RESULT_FILENAME --ios=$ios_version --no-uninstall --show-flutter-logs
-
+    fvm patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=RESULT_FILENAME=$DYNAMIC_RESULT_FILENAME --ios=$ios_version --no-uninstall --show-flutter-logs --verbose
     echo "3. Pulling iOS Simulator results..."
     echo "   (Note: This method only works on Simulators)"
     

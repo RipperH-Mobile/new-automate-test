@@ -50,7 +50,7 @@ if [ "$platform" == "android" ]; then
     fi
     echo "✅ Auto-detected Emulator ID: $DEVICE_ID"
     echo "2. Running Patrol (Android) for $ANDROID_PACKAGE_NAME..."
-    patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=ENV=$env --dart-define=DEVICE=$platform --no-uninstall --show-flutter-logs
+    fvm patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=ENV=$env --dart-define=DEVICE=$platform --no-uninstall --show-flutter-logs
 
     echo "3. Pulling Android results..."
     if adb -s "$DEVICE_ID" pull "$REMOTE_PATH". "$REPORT_DIR"; then
@@ -62,7 +62,7 @@ if [ "$platform" == "android" ]; then
 
 elif [ "$platform" == "ios" ]; then
     echo "2. Running Patrol (iOS $ios_version) for Scheme: $IOS_SCHEME_NAME / Bundle ID: $IOS_BUNDLE_ID..."
-    patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=ENV=$env --dart-define=DEVICE=$platform --ios=$ios_version --no-uninstall --show-flutter-logs
+    fvm patrol test --flavor $env -t $TEST_TARGET_FILE --dart-define=ENV=$env --dart-define=DEVICE=$platform --ios=$ios_version --no-uninstall --show-flutter-logs
 
     echo "3. Pulling iOS Simulator results..."
     echo "   (Note: This method only works on Simulators)"

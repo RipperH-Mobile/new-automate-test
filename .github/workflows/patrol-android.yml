@@ -54,7 +54,7 @@ jobs:
           echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS }}" > ios/Runner/GoogleService-Info.plist
 
       - name: 🍏 Fix & Clean iOS Pods
-        run: |
+        run: |   
             fvm flutter clean
             fvm flutter pub get
             cd ios
