@@ -100,6 +100,6 @@ jobs:
           target: google_apis
           arch: arm64-v8a # สำหรับ Mac ชิป M1/M2 (เปลี่ยนเป็น x86_64 ถ้าใช้ Intel)
           profile: pixel_6
-          script: |
+          script: |  
             fvm dart pub global activate patrol_cli 4.1.0
             fvm patrol test --flavor sit -t integration_test/test_suites/suite_feature_account_test.dart --dart-define=DEVICE=android --no-uninstall --show-flutter-logs --verbose
