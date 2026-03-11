@@ -6,7 +6,7 @@ on:
 
 jobs:
   ios-test:
-    runs-on: self-hosted
+    runs-on: self-hosted # เครื่อง Mac ของคุณ
     steps:
       - name: 🚀 Test Runner is Alive
         run: echo "Hello World! Runner is working!"
