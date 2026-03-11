@@ -1,4 +1,4 @@
-name: Patrol Automate Test (iOS & Android)
+name: Patrol Minimal Test
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ==========================================
+  # 🍎 JOB 1: iOS Simulator (วิ่งบนเครื่อง Mac ของคุณ)
+  # ==========================================
   ios-test:
-    runs-on: macos-latest
+    runs-on: self-hosted # 👈 เปลี่ยนมาใช้ self-hosted ตรงนี้ครับ
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v3
@@ -33,157 +36,70 @@ jobs:
       - name: ⚙️ Setup Patrol & Dependencies
         run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
-      - name: 📝 Create .env file
-        run: |
-          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
-          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_EMAIL_LOGS=emaillogs" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_ACCOUNTS=accounts" >> integration_test/.env.sit
-          echo "API_URL_BASE=${{ secrets.API_URL_BASE }}" >> integration_test/.env.sit
-          echo "API_URL_AUTH_OTP=/auth/otp" >> integration_test/.env.sit
-          echo "API_URL_AUTH_SIGN_IN=/auth/sign-in" >> integration_test/.env.sit
-          echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
-          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
-          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
-          
-          cp integration_test/.env.sit .env
-
-      - name: 📝 Inject GoogleService-Info.plist
-        run: |
-          echo "${{ secrets.GOOGLE_SERVICE_JSON_IOS }}" > ios/Runner/GoogleService-Info.plist
-
       - name: 🍏 Fix & Clean iOS Pods
         run: |
-            fvm flutter clean
-            fvm flutter pub get
-            cd ios
-            rm -rf Podfile.lock Pods build/
-            sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
-            
-            # 👇 [เพิ่มส่วนนี้] บังคับปิด Code Signing สำหรับ Simulator
-            sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' Runner.xcodeproj/project.pbxproj || true
-            sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' Runner.xcodeproj/project.pbxproj || true
-            
-            # 👇 [เพิ่มส่วนนี้] สคริปต์แก้ปัญหา Pods ทุกตัวให้รองรับ iOS 15.0 ป้องกันการแครช
-            cat << 'EOF' >> Podfile
-            
-            post_install do |installer|
-            installer.pods_project.targets.each do |target|
-             target.build_configurations.each do |config|
-               config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
-               config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'i386'
-             end
-            end
-            end
-            EOF
-            
-            pod install --repo-update
+          fvm flutter clean
+          fvm flutter pub get
+          cd ios
+          rm -rf Podfile.lock Pods build/
+          sed -i '' "s/^platform :ios, .*/platform :ios, '15.0'/g" Podfile || true
+          
+          # ปิด Code Signing
+          sed -i '' 's/CODE_SIGNING_REQUIRED = YES/CODE_SIGNING_REQUIRED = NO/g' Runner.xcodeproj/project.pbxproj || true
+          sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' Runner.xcodeproj/project.pbxproj || true
+          
+          pod install --repo-update
 
       - name: 📱 Run Patrol on iOS Simulator
         run: |
-                DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
-                xcrun simctl boot $DEVICE_UUID || true
-                
-                chmod +x ./integration_test/scripts/run_test.sh
-                
-                fvm dart pub global activate patrol_cli 4.1.0
-                
-                # ใส่ --verbose เพื่อให้พ่น Log ตัวแดงออกมาให้เห็นชัดๆ
-                ./integration_test/scripts/run_test.sh ios 17.5 sit test_suites/suite_feature_account_test.dart
-            
-      - name: 📁 Upload Patrol Error Log
-        if: failure() # ทำงานเฉพาะตอนที่ Build พัง
-        uses: actions/upload-artifact@v4
+          DEVICE_UUID=$(xcrun simctl list devices available | grep -i "iPhone" | head -n 1 | grep -oE "[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}")
+          xcrun simctl boot $DEVICE_UUID || true
+          
+          chmod +x ./integration_test/scripts/run_test.sh
+          chmod +x ./integration_test/scripts/run_test_batch.sh
+          
+          fvm dart pub global activate patrol_cli 4.1.0
+          
+          # สั่งรันเทส (เปิด --verbose เพื่อดู Log ถ้ามันพัง)
+          fvm patrol test --flavor sit -t integration_test/test_suites/suite_feature_account_test.dart --dart-define=DEVICE=ios --ios=17.5 --no-uninstall --show-flutter-logs --verbose
+
+
+  # ==========================================
+  # 🤖 JOB 2: Android Emulator (วิ่งบนเครื่อง Mac ของคุณ)
+  # ==========================================
+  android-test:
+    runs-on: self-hosted # 👈 อันนี้ก็วิ่งบนเครื่องคุณเหมือนเดิม
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
         with:
-            name: patrol-error-log
-            path: /Users/runner/.pub-cache/log/pub_log.txt
-            retention-days: 3
+          distribution: 'zulu'
+          java-version: '17'
 
-      - name: 📁 Upload iOS Results
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+
+      - name: 🔧 Setup FVM
+        run: dart pub global activate fvm
+
+      - name: 🔑 Setup SSH Key
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          name: patrol-test-results-ios
-          path: integration_test/test_results/*.csv
-          retention-days: 7
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: 💬 Send iOS Summary to Discord
-        if: always()
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          chmod +x integration_test/scripts/send_discord_summary.sh
-          ./integration_test/scripts/send_discord_summary.sh
+      - name: ⚙️ Setup Patrol & Dependencies
+        run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
 
-#  android-test:
-#    runs-on: self-hosted # 👈 กลับไปใช้เครื่องเซิร์ฟเวอร์ของคุณที่มี Android SDK/KVM สมบูรณ์
-#    steps:
-#      - name: 📥 Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: ☕ Setup Java
-#        uses: actions/setup-java@v3
-#        with:
-#          distribution: 'zulu'
-#          java-version: '17'
-#
-#      - name: 🐦 Setup Flutter
-#        uses: subosito/flutter-action@v2
-#
-#      - name: 🔧 Setup FVM
-#        run: dart pub global activate fvm
-#
-#      - name: 🔑 Setup SSH Key
-#        uses: webfactory/ssh-agent@v0.9.0
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-#
-#      - name: ⚙️ Setup Patrol & Dependencies
-#        run: make -f integration_test/scripts/setup_patrol.mk setup_patrol
-#
-#      - name: 📝 Create .env file
-#        run: |
-#          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
-#          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
-#          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
-#          echo "DB_MONGO_COLLECTION_EMAIL_LOGS=emaillogs" >> integration_test/.env.sit
-#          echo "DB_MONGO_COLLECTION_ACCOUNTS=accounts" >> integration_test/.env.sit
-#          echo "API_URL_BASE=${{ secrets.API_URL_BASE }}" >> integration_test/.env.sit
-#          echo "API_URL_AUTH_OTP=/auth/otp" >> integration_test/.env.sit
-#          echo "API_URL_AUTH_SIGN_IN=/auth/sign-in" >> integration_test/.env.sit
-#          echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
-#          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
-#          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
-#
-#      - name: 📱 Run Patrol on Android Emulator
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: 33
-#          target: google_apis
-#          arch: arm64-v8a # 👈 แก้ตรงนี้ตามเครื่อง self-hosted ของคุณ (ถ้าใช้ Mac M1/M2 ใช้ arm64-v8a, ถ้าใช้ Intel/Windows/Linux ใช้ x86_64)
-#          profile: pixel_6
-#          script: |
-#            chmod +x ./integration_test/scripts/run_test.sh
-#            chmod +x ./integration_test/scripts/run_test_batch.sh
-#            chmod +x ./integration_test/scripts/run_test_single.sh
-#
-#            fvm dart pub global activate patrol_cli 4.1.0
-#
-#            ./integration_test/scripts/run_test.sh android sit integration_test/test_suites/suite_feature_account_test.dart
-#
-#      - name: 📁 Upload Android Results
-#        if: always()
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: patrol-test-results-android
-#          path: integration_test/test_results/*.csv
-#          retention-days: 7
-#
-#      - name: 💬 Send Android Summary to Discord
-#        if: always()
-#        env:
-#          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-#        run: |
-#          chmod +x integration_test/scripts/send_discord_summary.sh
-#          ./integration_test/scripts/send_discord_summary.sh
+      - name: 📱 Run Patrol on Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: arm64-v8a # สำหรับ Mac ชิป M1/M2 (เปลี่ยนเป็น x86_64 ถ้าใช้ Intel)
+          profile: pixel_6
+          script: |
+            fvm dart pub global activate patrol_cli 4.1.0
+            fvm patrol test --flavor sit -t integration_test/test_suites/suite_feature_account_test.dart --dart-define=DEVICE=android --no-uninstall --show-flutter-logs --verbose
