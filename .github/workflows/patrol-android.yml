@@ -35,17 +35,17 @@ jobs:
 
       - name: 📝 Create .env file
         run: |
-          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
-          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_EMAIL_LOGS=emaillogs" >> integration_test/.env.sit
-          echo "DB_MONGO_COLLECTION_ACCOUNTS=accounts" >> integration_test/.env.sit
-          echo "API_URL_BASE=${{ secrets.API_URL_BASE }}" >> integration_test/.env.sit
-          echo "API_URL_AUTH_OTP=/auth/otp" >> integration_test/.env.sit
-          echo "API_URL_AUTH_SIGN_IN=/auth/sign-in" >> integration_test/.env.sit
-          echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
-          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
-          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
+#          echo "DB_MONGO_URL=${{ secrets.DB_MONGO_URL }}" >> integration_test/.env.sit
+#          echo "DB_MONGO_DB_NAME=${{ secrets.DB_MONGO_DB_NAME }}" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_SMS_LOGS=smslogs" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_EMAIL_LOGS=emaillogs" >> integration_test/.env.sit
+#          echo "DB_MONGO_COLLECTION_ACCOUNTS=accounts" >> integration_test/.env.sit
+#          echo "API_URL_BASE=${{ secrets.API_URL_BASE }}" >> integration_test/.env.sit
+#          echo "API_URL_AUTH_OTP=/auth/otp" >> integration_test/.env.sit
+#          echo "API_URL_AUTH_SIGN_IN=/auth/sign-in" >> integration_test/.env.sit
+#          echo "API_URL_USERS_SETTING_OTP_VERIFY=/users/settings/otp/verify" >> integration_test/.env.sit
+#          echo "API_URL_USERS_SETTING_ACCOUNT=/users/settings/account" >> integration_test/.env.sit
+#          echo "ACCOUNT_SALT_PASSWORD=${{ secrets.ACCOUNT_SALT_PASSWORD }}" >> integration_test/.env.sit
           
           cp integration_test/.env.sit .env
 
